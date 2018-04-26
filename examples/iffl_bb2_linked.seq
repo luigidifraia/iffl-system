@@ -1,0 +1,4 @@
+format iffl,01 d64 iffl_bb2_linked.d64 8
+write iffl_bb2_linked.prg iffl-example
+write iffldata_bb2_linked iffldata
+exit

@@ -1,0 +1,4 @@
+format iffl,01 d64 iffl_pucr.d64 8
+write iffl_pucr.prg iffl-example
+write iffldata_pucr iffldata
+exit
