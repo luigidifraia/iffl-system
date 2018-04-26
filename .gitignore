@@ -1,0 +1,14 @@
+# Object files
+*.o
+
+# Executables
+*.out
+*.hex
+
+# Crunched files
+*.b2
+*.exo
+*.puc
+
+# Intermediate IFFL files
+data_*_linked iffl_*.prg iffldata_*
