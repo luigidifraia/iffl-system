@@ -60,7 +60,7 @@ iffldata_bb2_linked: music.prg.b2 picture.prg.b2
 ifeq ($(findstring Windows,$(OS)),Windows)
 	copy /b music.prg.b2 + picture.prg.b2 data_bb2_linked
 else
-	cat music.prg.b2 picture.prg.b2 > data_bb2_linked
+	cat $^ > data_bb2_linked
 endif
 	addiffl $@ data_bb2_linked
 
@@ -74,7 +74,7 @@ iffldata_exom_linked: music.exo picture.exo
 ifeq ($(findstring Windows,$(OS)),Windows)
 	copy /b music.exo + picture.exo data_exom_linked
 else
-	cat music.exo picture.exo > data_exom_linked
+	cat $^ > data_exom_linked
 endif
 	addiffl $@ data_exom_linked
 
@@ -88,7 +88,7 @@ iffldata_pucr_linked: music.puc picture.puc
 ifeq ($(findstring Windows,$(OS)),Windows)
 	copy /b music.puc + picture.puc data_pucr_linked
 else
-	cat music.puc picture.puc > data_pucr_linked
+	cat $^ > data_pucr_linked
 endif
 	addiffl $@ data_pucr_linked
 
