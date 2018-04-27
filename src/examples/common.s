@@ -21,11 +21,11 @@ initmusicplayback:
                 sta $d01a
                 lda $dc0d               ;Acknowledge timer interrupt
                 lda #$00
-                jsr $1000
+                jsr $1000               ;Init tune
                 cli
                 rts
 
-raster:         jsr $1003
+raster:         jsr $1003               ;Play tune
                 dec $d019
                 jmp $ea31
 
