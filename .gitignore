@@ -11,4 +11,6 @@
 *.puc
 
 # Intermediate IFFL files
-data_*_linked iffl_*.prg iffldata_*
+data_*_linked
+iffl_*.prg
+iffldata_*
