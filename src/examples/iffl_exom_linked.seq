@@ -1,4 +1,2 @@
-format iffl,01 d64 iffl_exom_linked.d64 8
-write iffl_exom_linked.prg iffl-example
-write iffldata_exom_linked iffldata
-exit
+iffl_exom_linked.prg IFFL_EXAMPLE
+iffldata_exom_linked IFFLDATA

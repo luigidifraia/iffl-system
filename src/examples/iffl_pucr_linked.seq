@@ -1,4 +1,2 @@
-format iffl,01 d64 iffl_pucr_linked.d64 8
-write iffl_pucr_linked.prg iffl-example
-write iffldata_pucr_linked iffldata
-exit
+iffl_pucr_linked.prg IFFL_EXAMPLE
+iffldata_pucr_linked IFFLDATA
