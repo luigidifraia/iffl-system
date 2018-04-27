@@ -1,4 +1,2 @@
-format iffl,01 d64 iffl_unp.d64 8
-write iffl_unp.prg iffl-example
-write iffldata_unp iffldata
-exit
+iffl_unp.prg IFFL_EXAMPLE
+iffldata_unp IFFLDATA
