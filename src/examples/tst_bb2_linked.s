@@ -20,6 +20,7 @@ error:          sta $d020               ;If any error, store errorcode to border
                 jmp done                ;loop endlessly
 
                 include common.s
+
                 include cfg_bb2.s
                 include ..\iffl_loader.s
                 include ..\iffl_init.s
