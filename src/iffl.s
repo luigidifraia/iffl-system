@@ -1392,107 +1392,6 @@ enableio_01:    lda #$36
                 endif
 
 ;-------------------------------------------------------------------------------
-; INITLOADER
-;
-; Uploads the IFFL drivecode to disk drive memory and starts it.
-;
-; Parameters: -
-; Returns: C=0 IFFL initialized OK
-;          C=1 Error
-; Modifies: A,X,Y
-;-------------------------------------------------------------------------------
-
-initloader:     lda #<il_nmi            ;Set NMI vector (let NMI trigger once
-                sta $0318               ;so RESTORE keypresses won't interfere
-                sta $fffa               ;with loading and PAL/NTSC detection)
-                lda #>il_nmi
-                sta $0319
-                sta $fffb
-                lda #$81
-                sta $dd0d               ;Timer A interrupt source
-                lda #$01                ;Timer A count ($0001)
-                sta $dd04
-                lda #$00
-                sta $dd05
-                lda #%00011001          ;Run Timer A in one-shot mode
-                sta $dd0e
-                lda #>drivecode_drv
-                sta il_mwstring+1
-                lda #>drivecode_c64
-                sta il_senddata+2
-                lda #(drivecodeend_drv-drivecode_drv+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
-                sta loadtempreg         ;Number of "packets" to send
-                ldy #$00
-                beq il_nextpacket
-il_sendmw:      lda il_mwstring,x       ;Send M-W command (backwards)
-                jsr ciout
-                dex
-                bpl il_sendmw
-                ldx #MW_DATA_LENGTH
-il_senddata:    lda drivecode_c64,y     ;Send one byte of drivecode
-                jsr ciout
-                iny
-                bne il_notover
-                inc il_senddata+2
-il_notover:     inc il_mwstring+2       ;Also, move the M-W pointer forward
-                bne il_notover2
-                inc il_mwstring+1
-il_notover2:    dex
-                bne il_senddata
-                jsr unlsn               ;Unlisten to perform the command
-il_nextpacket:  lda fa                  ;Set drive to listen
-                jsr listen
-                lda #$6f
-                jsr second
-                ldx #$05
-                dec loadtempreg         ;All "packets" sent?
-                bpl il_sendmw
-                dex
-il_sendme:      lda il_mestring,x       ;Send M-E command (backwards)
-                jsr ciout
-                dex
-                bpl il_sendme
-                jsr unlsn               ;Start drivecode
-
-                if TWOBIT_PROTOCOL=0
-il_wait:        bit $dd00               ;Wait for 1541 to signal drv_init
-                bvs il_wait             ;started by setting CLK low
-                else
-                sei                     ;Sokrates' variant for video std detection
-                lda $d011               ;Make sure NMI was caught first
-                and #$10
-                bne il_detect
-                lda #$8e                ;Correct cycle count if screen is blanked
-                sta il_midcycles+1
-il_detect:      ldx #$00
-il_waitraster0: lda $d012
-il_waitraster1: cmp $d012
-                beq il_waitraster1
-                bmi il_waitraster0
-                and #$03
-                cmp #$03
-                bne il_isntsc
-                tay
-il_countcycles: inx
-                lda $d012
-                bpl il_countcycles
-il_midcycles:   cpx #$5e                ;VICE values: $6C for Drean, $50 for PAL
-                                        ;(with screen blanked: $9C and $80)
-                bcs il_isdrean          ;so choose middle value, $5E
-                iny
-                lda #$30                ;Adjust 2-bit fastload transfer
-                sta getbyte_delay       ;delay only for PAL
-il_isdrean:     tya                     ;$03 for Drean, $04 for PAL
-il_isntsc:      cli                     ;$01 for old NTSC, $02 for NTSC
-                endif
-
-                jsr getbyte             ;Get a byte from the drive
-                cmp #$02                ;Error or OK?
-                rts
-
-il_nmi:         rti
-
-;-------------------------------------------------------------------------------
 ; GETBYTE
 ;
 ; Gets one byte from the diskdrive; with 2-bit protocol sprites must be off.
@@ -1609,6 +1508,128 @@ sendbyte_ack2:  bit $dd00               ;Wait for CLK & DATA high
                 bne sendbyte_bitloop
 sendbyte_endloop:
                 rts
+
+;-------------------------------------------------------------------------------
+; Loader variables, if not in zeropage
+;-------------------------------------------------------------------------------
+
+                if ADDITIONAL_ZEROPAGE=0
+loadtempreg:    dc.b 0                  ;Temp variable for the loader
+bufferstatus:   dc.b 0                  ;Bytes in fastload buffer
+                endif
+
+;-------------------------------------------------------------------------------
+; Load buffer
+;-------------------------------------------------------------------------------
+
+                if RECEIVE_BUFFER>0
+loadbuffer:     ds.b 254,0
+                endif
+
+;-------------------------------------------------------------------------------
+; Disposable portion of loader (routines only needed when initializing)
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; INITLOADER
+;
+; Uploads the IFFL drivecode to disk drive memory and starts it.
+;
+; Parameters: -
+; Returns: C=0 IFFL initialized OK
+;          C=1 Error
+; Modifies: A,X,Y
+;-------------------------------------------------------------------------------
+
+initloader:     lda #<il_nmi            ;Set NMI vector (let NMI trigger once
+                sta $0318               ;so RESTORE keypresses won't interfere
+                sta $fffa               ;with loading and PAL/NTSC detection)
+                lda #>il_nmi
+                sta $0319
+                sta $fffb
+                lda #$81
+                sta $dd0d               ;Timer A interrupt source
+                lda #$01                ;Timer A count ($0001)
+                sta $dd04
+                lda #$00
+                sta $dd05
+                lda #%00011001          ;Run Timer A in one-shot mode
+                sta $dd0e
+                lda #>drivecode_drv
+                sta il_mwstring+1
+                lda #>drivecode_c64
+                sta il_senddata+2
+                lda #(drivecodeend_drv-drivecode_drv+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
+                sta loadtempreg         ;Number of "packets" to send
+                ldy #$00
+                beq il_nextpacket
+il_sendmw:      lda il_mwstring,x       ;Send M-W command (backwards)
+                jsr ciout
+                dex
+                bpl il_sendmw
+                ldx #MW_DATA_LENGTH
+il_senddata:    lda drivecode_c64,y     ;Send one byte of drivecode
+                jsr ciout
+                iny
+                bne il_notover
+                inc il_senddata+2
+il_notover:     inc il_mwstring+2       ;Also, move the M-W pointer forward
+                bne il_notover2
+                inc il_mwstring+1
+il_notover2:    dex
+                bne il_senddata
+                jsr unlsn               ;Unlisten to perform the command
+il_nextpacket:  lda fa                  ;Set drive to listen
+                jsr listen
+                lda #$6f
+                jsr second
+                ldx #$05
+                dec loadtempreg         ;All "packets" sent?
+                bpl il_sendmw
+                dex
+il_sendme:      lda il_mestring,x       ;Send M-E command (backwards)
+                jsr ciout
+                dex
+                bpl il_sendme
+                jsr unlsn               ;Start drivecode
+
+                if TWOBIT_PROTOCOL=0
+il_wait:        bit $dd00               ;Wait for 1541 to signal drv_init
+                bvs il_wait             ;started by setting CLK low
+                else
+                sei                     ;Sokrates' variant for video std detection
+                lda $d011               ;Make sure NMI was caught first
+                and #$10
+                bne il_detect
+                lda #$8e                ;Correct cycle count if screen is blanked
+                sta il_midcycles+1
+il_detect:      ldx #$00
+il_waitraster0: lda $d012
+il_waitraster1: cmp $d012
+                beq il_waitraster1
+                bmi il_waitraster0
+                and #$03
+                cmp #$03
+                bne il_isntsc
+                tay
+il_countcycles: inx
+                lda $d012
+                bpl il_countcycles
+il_midcycles:   cpx #$5e                ;VICE values: $6C for Drean, $50 for PAL
+                                        ;(with screen blanked: $9C and $80)
+                bcs il_isdrean          ;so choose middle value, $5E
+                iny
+                lda #$30                ;Adjust 2-bit fastload transfer
+                sta getbyte_delay       ;delay only for PAL
+il_isdrean:     tya                     ;$03 for Drean, $04 for PAL
+il_isntsc:      cli                     ;$01 for old NTSC, $02 for NTSC
+                endif
+
+                jsr getbyte             ;Get a byte from the drive
+                cmp #$02                ;Error or OK?
+                rts
+
+il_nmi:         rti
 
 ;-------------------------------------------------------------------------------
 ; M-W and M-E command strings
@@ -2044,20 +2065,3 @@ drv_filename:   dc.b "IFFLDATA",0
 drivecodeend_drv:
                 rend
 drivecodeend_c64:
-
-;-------------------------------------------------------------------------------
-; Loader variables, if not in zeropage
-;-------------------------------------------------------------------------------
-
-                if ADDITIONAL_ZEROPAGE=0
-loadtempreg:    dc.b 0                  ;Temp variable for the loader
-bufferstatus:   dc.b 0                  ;Bytes in fastload buffer
-                endif
-
-;-------------------------------------------------------------------------------
-; Load buffer
-;-------------------------------------------------------------------------------
-
-                if RECEIVE_BUFFER>0
-loadbuffer:     ds.b 254,0
-                endif
