@@ -1527,7 +1527,7 @@ loadbuffer:     ds.b 254,0
                 endif
 
 ;-------------------------------------------------------------------------------
-; Disposable portion of loader (routines only needed when initializing)
+; Disposable portion of the IFFL system (routines only needed when initializing)
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
