@@ -86,11 +86,19 @@ initialize      = $d005                 ;Initialize routine (for return to diskd
 ;
 ; Uploads the IFFL drivecode to disk drive memory and starts it.
 ;
+; Remarks: If the IFFL loader requires relocation to page 2 and/or 3, then
+;          call initloader1, relocate the loader, and then call initloader2.
+;
 ; Parameters: -
 ; Returns: C=0 IFFL initialized OK
 ;          C=1 Error
 ; Modifies: A,X,Y
 ;-------------------------------------------------------------------------------
+
+initloader1:
+                lda #$4c                ;OP for JMP: disable execution of the
+                sta il_retearly         ;second half of the initialization as
+                                        ;the IFFL loader cannot be relocated yet
 
 initloader:     lda #<il_nmi            ;Set NMI vector (let NMI trigger once
                 sta $0318               ;so RESTORE keypresses won't interfere
@@ -142,8 +150,9 @@ il_sendme:      lda il_mestring,x       ;Send M-E command (backwards)
                 jsr ciout
                 dex
                 bpl il_sendme
-                jsr unlsn               ;Start drivecode
+il_retearly:    jsr unlsn               ;Start drivecode
 
+initloader2:
                 if TWOBIT_PROTOCOL=0
 il_wait:        bit $dd00               ;Wait for 1541 to signal drv_init
                 bvs il_wait             ;started by setting CLK low
