@@ -29,25 +29,25 @@ iffl_pucr_linked.d64: iffl_pucr_linked.prg iffldata_pucr_linked iffl_pucr_linked
 iffl_unp.d64: iffl_unp.prg iffldata_unp iffl_unp.seq
 	makedisk $@ iffl_unp.seq "IFFL EXAMPLE      IF 2A" 10
 
-iffl_bb2.prg: tst_bb2.s cfg_bb2.s ../iffl.s
+iffl_bb2.prg: tst_bb2.s cfg_bb2.s ../iffl_init.s ../iffl_loader.s
 	dasm $< -o$@
 
-iffl_bb2_linked.prg: tst_bb2_linked.s cfg_bb2.s ../iffl.s
+iffl_bb2_linked.prg: tst_bb2_linked.s cfg_bb2.s ../iffl_init.s ../iffl_loader.s
 	dasm $< -o$@
 
-iffl_exom.prg: tst_exom.s cfg_exom.s ../iffl.s
+iffl_exom.prg: tst_exom.s cfg_exom.s ../iffl_init.s ../iffl_loader.s
 	dasm $< -o$@
 
-iffl_exom_linked.prg: tst_exom_linked.s cfg_exom.s ../iffl.s
+iffl_exom_linked.prg: tst_exom_linked.s cfg_exom.s ../iffl_init.s ../iffl_loader.s
 	dasm $< -o$@
 
-iffl_pucr.prg: tst_pucr.s cfg_pucr.s ../iffl.s
+iffl_pucr.prg: tst_pucr.s cfg_pucr.s ../iffl_init.s ../iffl_loader.s
 	dasm $< -o$@
 
-iffl_pucr_linked.prg: tst_pucr_linked.s cfg_pucr.s ../iffl.s
+iffl_pucr_linked.prg: tst_pucr_linked.s cfg_pucr.s ../iffl_init.s ../iffl_loader.s
 	dasm $< -o$@
 
-iffl_unp.prg: tst_unp.s cfg_unp.s ../iffl.s
+iffl_unp.prg: tst_unp.s cfg_unp.s ../iffl_init.s ../iffl_loader.s
 	dasm $< -o$@
 
 iffldata_bb2: music.prg.b2 picture.prg.b2

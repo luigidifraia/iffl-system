@@ -21,4 +21,5 @@ error:          sta $d020               ;If any error, store errorcode to border
 
                 include common.s
                 include cfg_exom.s
-                include ..\iffl.s
+                include ..\iffl_loader.s
+                include ..\iffl_init.s
