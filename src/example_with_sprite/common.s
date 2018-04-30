@@ -33,7 +33,7 @@ raster:         jsr $1003               ;Play tune
 screen = $6000 ; Video matrix in use
 bitmap = $4000 ; Bitmap address
 
-showpicture:    lda #((screen^$FFFF)>>14)
+setvideomode:   lda #((screen^$FFFF)>>14)
                 sta $dd00               ;Set videobank
                 lda #$3b
                 sta $d011               ;Set Y-scrolling / bitmap mode
