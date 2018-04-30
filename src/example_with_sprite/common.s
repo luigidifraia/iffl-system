@@ -4,7 +4,7 @@
 
                 processor 6502
 
-initmusicplayback:
+initirq:
                 sei
                 lda #<raster
                 sta $0314
