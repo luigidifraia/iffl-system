@@ -51,7 +51,7 @@ copycolors:     lda $6400,x             ;Copy the colorscreen
                 sta $d900,x
                 lda $6600,x
                 sta $da00,x
-                lda $66e8,x
+                lda $66e8,x             ;Make sure we won't write past $dbe8
                 sta $dae8,x
                 inx
                 bne copycolors
