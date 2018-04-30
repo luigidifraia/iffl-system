@@ -55,42 +55,48 @@ iffldata_bb2: music.prg.b2 picture.prg.b2
 	addiffl $@ music.prg.b2
 	addiffl $@ picture.prg.b2
 
-iffldata_bb2_linked: music.prg.b2 picture.prg.b2
+iffldata_bb2_linked: data_bb2_linked
 	makeiffl $@
+	addiffl $@ $<
+
+data_bb2_linked: music.prg.b2 picture.prg.b2
 ifeq ($(findstring Windows,$(OS)),Windows)
-	copy /b music.prg.b2 + picture.prg.b2 data_bb2_linked
+	copy /b music.prg.b2 + picture.prg.b2 $@
 else
-	cat $^ > data_bb2_linked
+	cat $^ > $@
 endif
-	addiffl $@ data_bb2_linked
 
 iffldata_exom: music.exo picture.exo
 	makeiffl $@
 	addiffl $@ music.exo
 	addiffl $@ picture.exo
 
-iffldata_exom_linked: music.exo picture.exo
+iffldata_exom_linked: data_exom_linked
 	makeiffl $@
+	addiffl $@ $<
+
+data_exom_linked: music.exo picture.exo
 ifeq ($(findstring Windows,$(OS)),Windows)
-	copy /b music.exo + picture.exo data_exom_linked
+	copy /b music.exo + picture.exo $@
 else
-	cat $^ > data_exom_linked
+	cat $^ > $@
 endif
-	addiffl $@ data_exom_linked
 
 iffldata_pucr: music.puc picture.puc
 	makeiffl $@
 	addiffl $@ music.puc
 	addiffl $@ picture.puc
 
-iffldata_pucr_linked: music.puc picture.puc
+iffldata_pucr_linked: data_pucr_linked
 	makeiffl $@
+	addiffl $@ $<
+
+data_pucr_linked: music.puc picture.puc
 ifeq ($(findstring Windows,$(OS)),Windows)
-	copy /b music.puc + picture.puc data_pucr_linked
+	copy /b music.puc + picture.puc $@
 else
-	cat $^ > data_pucr_linked
+	cat $^ > $@
 endif
-	addiffl $@ data_pucr_linked
 
 iffldata_unp: music.prg picture.prg
 	makeiffl $@
