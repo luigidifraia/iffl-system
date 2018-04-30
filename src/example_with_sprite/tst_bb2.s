@@ -16,7 +16,7 @@ start:          jsr initloader
                 bcs error
                 jsr showpicture
                 jsr vsetup
-                jsr initmusicplayback
+                jsr initirq             ;Attach tune playback and sprite animation
                 lda #$10                ;Try to load some nonexistent file -
                 jsr loadfile_bboozer2   ;should be harmless as long file number
                 lda #$02                ;< MAXFILES
