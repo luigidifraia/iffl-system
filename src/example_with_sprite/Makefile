@@ -14,11 +14,17 @@ iffl_bb2.d64: iffl_bb2.prg iffldata_bb2 iffl_bb2.seq
 iffl_bb2.prg: tst_bb2.s cfg_bb2.s ../iffl_init.s ../iffl_loader.s
 	dasm $< -o$@
 
-iffldata_bb2: sprites.prg.b2 music.prg.b2 picture_data_bb2_linked
+iffldata_bb2: sprites_and_music_data_bb2_linked picture_data_bb2_linked
 	makeiffl $@
-	addiffl $@ sprites.prg.b2
-	addiffl $@ music.prg.b2
+	addiffl $@ sprites_and_music_data_bb2_linked
 	addiffl $@ picture_data_bb2_linked
+
+sprites_and_music_data_bb2_linked: sprites.prg.b2 music.prg.b2
+ifeq ($(findstring Windows,$(OS)),Windows)
+	copy /b sprites.prg.b2 + music.prg.b2 $@
+else
+	cat $^ > $@
+endif
 
 sprites.prg.b2: sprites.prg
 	b2 -b $<
