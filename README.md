@@ -11,7 +11,7 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - Under Windows you might want to run `win32/ifflvar.bat` to setup your build environment, then run `make`.
 
 ## Fixes
-- The `addiffl` tool does not overwrite records whose length's LSB is 0.
+- The `addiffl` tool does not overwrite existing records whose length's LSB happens to be 0.
 
 ## Extensions
 - Added 1-bit transfer support for using sprites while loading (`TWOBIT_PROTOCOL = 0` as per Covert Bitops' [Loadersystem](https://cadaver.github.io/tools.html)).
