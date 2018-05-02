@@ -356,12 +356,20 @@ drv_scanwait:   lda buf2cmd
                 jsr drv_sendbyte        ;Now A=0, send the byte so that C64
                                         ;knows the file was scanned successfully
 
+drv_mainloop:
                 if TWOBIT_PROTOCOL=0
-                lda #$00                ;Set CLK=DATA=high
+                lda $1800               ;Set CLK=High
+                and #$f7
                 sta $1800
+                lda #$04
+drv_mainfilewait:
+                bit $1800               ;Wait for CLK=High
+                bne drv_mainfilewait
+                ldy #$00                ;Set DATA=High
+                sty $1800
                 endif
 
-drv_mainloop:   cli                     ;Allow interrupts so drive may stop
+                cli                     ;Allow interrupts so drive may stop
                 jsr drv_getbyte         ;Get file number from C64
                 tay                     ;(file number also now in drvtemp2)
 
@@ -446,18 +454,6 @@ drv_mainfilefail:
                 jsr drv_sendbyte
                 pla
                 jsr drv_sendbyte
-
-                if TWOBIT_PROTOCOL=0
-                lda $1800               ;Set CLK=High
-                and #$f7
-                sta $1800
-                lda #$04
-drv_mainfilewait:
-                bit $1800               ;Wait for CLK=High
-                bne drv_mainfilewait
-                ldy #$00                ;Set DATA=High
-                sty $1800
-                endif
 
                 jmp drv_mainloop        ;Then go back to main to wait for
                                         ;file number
