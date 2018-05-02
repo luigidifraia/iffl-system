@@ -78,10 +78,6 @@ decode          = $f7e8                 ;Decode 5 GCR bytes, bufferindex in Y
 initialize      = $d005                 ;Initialize routine (for return to diskdrive OS)
 
 ;-------------------------------------------------------------------------------
-; Disposable portion of the IFFL system (routines only needed when initializing)
-;-------------------------------------------------------------------------------
-
-;-------------------------------------------------------------------------------
 ; INITLOADER
 ;
 ; Uploads the IFFL drivecode to disk drive memory and starts it.
