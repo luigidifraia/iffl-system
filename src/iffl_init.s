@@ -499,8 +499,8 @@ drv_sendwait2:  bit $1800               ;Wait for CLK==high (start of high speed
                 sta $1800
                 nop
                 nop
-                lda #$00                ;CLK=DATA=high
-                sta $1800
+                lda #$00
+                sta $1800               ;Finish send: DATA & CLK both high
 
                 else
 
