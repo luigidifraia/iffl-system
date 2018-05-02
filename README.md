@@ -1,5 +1,5 @@
 # IFFL System
-Lasse Öörni's Integrated File Flexible Loader for Commodore 1541/1541-II drives.
+Lasse Öörni's Integrated File Flexible Loader for Commodore 1541/1541-II/157x drives.
 
 Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rants/iffl.html).
 
@@ -19,6 +19,9 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - Added optional buffer-less block receive support (`RECEIVE_BUFFER = 0` saves 254 bytes on the C=64, with some speed trade-off).
 - Added support for ByteBoozer 2.0 (which does **not** require a depack buffer on the C=64), Pucrunch and Exomizer files.
 
+## In progress
+- Support for Commodore 1581 drives is being developed in a separate branch with help and contributions from Lasse.
+
 ## To do
 - Mark sections of the code that are critical to keep in the same page in RAM.
-- Add support for 1571/1581, FD2000/4000, IDE64, and SD2IEC.
+- Add support for 1581, FD2000/4000, IDE64, and SD2IEC.
