@@ -339,6 +339,7 @@ drv_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
                 sta drvlentblhi+MAXFILES
                 sta drvtemp2            ;Clear the scanning file counter
                 sta drvcntl             ;Clear the 16bit IFFL byte counter
+;                sta drvcnth             ;TODO: Already 0 after a reset
                 lda drvbuf              ;Now get the next T/S (where actual
                 sta buf2trk             ;data starts) and perform the scanning
                 lda drvbuf+1            ;with the seek/execute jobcode
