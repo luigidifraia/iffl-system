@@ -92,9 +92,6 @@ initialize      = $d005                 ;Initialize routine (for return to diskd
 ; Modifies: A,X,Y
 ;-------------------------------------------------------------------------------
 
-initloader:     jsr initloader1
-                jmp initloader2
-
 initloader1:    lda #<il_nmi            ;Set NMI vector (let NMI trigger once
                 sta $0318               ;so RESTORE keypresses won't interfere
                 sta $fffa               ;with loading and PAL/NTSC detection)
@@ -151,6 +148,7 @@ il_sendme:      lda il_mestring,x       ;Send M-E command (backwards)
                 bpl il_sendme
                 jmp unlsn               ;Start drivecode
 
+initloader:     jsr initloader1
 initloader2:
                 if TWOBIT_PROTOCOL=0
 il_wait:        bit $dd00               ;Wait for 1541 to signal drv_init
