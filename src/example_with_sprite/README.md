@@ -1,5 +1,7 @@
-# IFFL System Example with Sprite
-The example in this folder implements a familiar scenario: load data for a few sprite images, a tune, a multicolor bitmap picture, and display a single sprite while the loading and tune playback is in progress.
+# IFFL System Examples with Sprite
+The examples in this folder implement a familiar scenario:
+- load data for a few sprite images and a tune, 
+- display a single sprite while tune playback  and the loading of a further multicolor bitmap picture are in progress.
 
 ## Notes
-- The one-bit protocol is used in this example, in order to allow a sprite on screen.
+- The one-bit protocol is used in these examples, in order to allow a sprite on screen.
