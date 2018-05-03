@@ -110,13 +110,17 @@ initloader:     lda #<il_nmi            ;Set NMI vector (let NMI trigger once
                 sta $dd05
                 lda #%00011001          ;Run Timer A in one-shot mode
                 sta $dd0e
+
+                lda #<drivecode_c64
+                ldx #>drivecode_c64
+                ldy #(drivecodeend_drv-drivecode_drv+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
+il_begin:       sta il_senddata+1
+                stx il_senddata+2
+                sty loadtempreg         ;Number of "packets" to send
                 lda #>drivecode_drv
                 sta il_mwstring+1
-                lda #>drivecode_c64
-                sta il_senddata+2
-                lda #(drivecodeend_drv-drivecode_drv+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
-                sta loadtempreg         ;Number of "packets" to send
                 ldy #$00
+;                sty il_mwstring+2       ;Drivecode starts at lowbyte 0
                 beq il_nextpacket
 il_sendmw:      lda il_mwstring,x       ;Send M-W command (backwards)
                 jsr ciout
