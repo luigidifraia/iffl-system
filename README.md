@@ -17,7 +17,7 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - Added 1-bit transfer support for using sprites while loading (`TWOBIT_PROTOCOL = 0` as per Covert Bitops' [Loadersystem](https://cadaver.github.io/tools.html)).
 - Added support for loading under the I/O area and Kernal ROM (`LOAD_UNDER_IO = 1` as per Covert Bitops' [Loadersystem](https://cadaver.github.io/tools.html)).
 - Added optional buffer-less block receive support (`RECEIVE_BUFFER = 0` saves 254 bytes on the C=64, with some speed trade-off).
-- Added support for ByteBoozer 2.0 (which does **not** require a depack buffer on the C=64), Pucrunch and Exomizer files.
+- Added support for ByteBoozer 2.0 (which does **not** require a depack buffer on the C=64), Pucrunch and Exomizer files. Furthermore, linked files are all loaded with a single loader call.
 
 ## In progress
 - Support for Commodore 1581 drives is being developed in a separate branch with help and contributions from Lasse.
