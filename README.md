@@ -8,7 +8,7 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - Assemble with `dasm`: v2.12.04 from Covert Bitops' [Tools page](https://cadaver.github.io/tools.html) has been tested.
 - The `makedisk` tool is available from Covert Bitops' [Tools page](https://cadaver.github.io/tools.html).
 - Use the extended version of the ByteBoozer2 cruncher from [here](https://github.com/luigidifraia/ByteBoozer2).
-- Under Windows you might want to run `win32/ifflvar.bat` to setup your build environment, then run `make`.
+- Under Windows you might want to run `win32/ifflvar.bat` to setup your build environment, then either run `make` or any of the provided batch files.
 
 ## Fixes
 - The `addiffl` tool does not overwrite existing records whose length's LSB happens to be 0.
