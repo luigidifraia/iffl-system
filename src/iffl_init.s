@@ -48,6 +48,7 @@ save            = $ffd8
 drvlentbllo     = $0300                 ;File length lobytes
 drvlentblhi     = $0380                 ;File length hibytes
 drvbuf          = $0400                 ;Sector data buffer
+drvstart        = $0500                 ;Start of drivecode
 
 drvtrklinktbl   = $0420                 ;Track link table for fast scanning
 drvsctlinktbl   = $0440                 ;Sector link table for fast scanning
@@ -91,12 +92,10 @@ initialize      = $d005                 ;Initialize routine (for return to diskd
 ; Modifies: A,X,Y
 ;-------------------------------------------------------------------------------
 
-initloader1:
-                lda #$4c                ;OP for JMP: disable execution of the
-                sta il_retearly         ;second half of the initialization as
-                                        ;the IFFL loader cannot be relocated yet
+initloader:     jsr initloader1
+                jmp initloader2
 
-initloader:     lda #<il_nmi            ;Set NMI vector (let NMI trigger once
+initloader1:    lda #<il_nmi            ;Set NMI vector (let NMI trigger once
                 sta $0318               ;so RESTORE keypresses won't interfere
                 sta $fffa               ;with loading and PAL/NTSC detection)
                 lda #>il_nmi
@@ -117,7 +116,7 @@ initloader:     lda #<il_nmi            ;Set NMI vector (let NMI trigger once
 il_begin:       sta il_senddata+1
                 stx il_senddata+2
                 sty loadtempreg         ;Number of "packets" to send
-                lda #>drivecode_drv
+                lda #>drvstart
                 sta il_mwstring+1
                 ldy #$00
 ;                sty il_mwstring+2       ;Drivecode starts at lowbyte 0
@@ -150,7 +149,7 @@ il_sendme:      lda il_mestring,x       ;Send M-E command (backwards)
                 jsr ciout
                 dex
                 bpl il_sendme
-il_retearly:    jsr unlsn               ;Start drivecode
+                jmp unlsn               ;Start drivecode
 
 initloader2:
                 if TWOBIT_PROTOCOL=0
@@ -204,7 +203,7 @@ il_mestring:    dc.b >drv_init, <drv_init, "E-M"
 ;-------------------------------------------------------------------------------
 
 drivecode_c64:
-                rorg $500
+                rorg drvstart
 drivecode_drv:
 
 ;-------------------------------------------------------------------------------
