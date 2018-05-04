@@ -693,9 +693,6 @@ drv_sendwait2:  bit $1800               ;Wait for CLK==high (start of high speed
 ;-------------------------------------------------------------------------------
 
                 if TWOBIT_PROTOCOL>0
-drv_delay18:    cmp ($00,x)
-drv_delay12:    rts
-
 drv_sendtbl:    dc.b $0f,$07,$0d,$05
                 dc.b $0b,$03,$09,$01
                 dc.b $0e,$06,$0c,$04
