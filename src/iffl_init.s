@@ -89,7 +89,7 @@ initialize_1mhz = $d005                 ;Initialize routine (for return to diskd
 drvtrklinktbl_2mhz = $0800              ;Track link table for fast scanning
 drvsctlinktbl_2mhz = $0840              ;Sector link table for fast scanning
 
-drvoffstbl_2mhz = $0900                 ;Start offset of files
+drvoffstbl_2mhz = $0880                 ;Start offset of files
 
 buf1trk_2mhz    = $0d                   ;Buffer 1 track
 buf1sct_2mhz    = $0e                   ;Buffer 1 sector
