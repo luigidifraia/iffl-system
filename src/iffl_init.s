@@ -110,9 +110,7 @@ initloader1:    lda #<il_nmi            ;Set NMI vector (let NMI trigger once
                 lda #%00011001          ;Run Timer A in one-shot mode
                 sta $dd0e
 
-il_detectdrive: lda #$aa
-                sta $a5
-                lda #<il_drivecode
+il_detectdrive: lda #<il_drivecode
                 ldx #>il_drivecode
                 ldy #(il_driveend-il_drivecode+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
                 jsr il_begin             ;Upload test-drivecode
@@ -146,15 +144,27 @@ il_ddsendmr:    lda il_mrstring,x       ;Send M-R command (backwards)
                 tax
                 jsr untlk
                 pla
+                cmp #$aa                ;Drive can execute code, so can
+                beq il_fastloadok       ;use fastloader
+                rts
 
-		lda #<drv_init
-		ldx #>drv_init
-		sta il_mestring+1
-		stx il_mestring
+il_fastloadok:  inc usefastload
+
+;                cpx #$01
+;                bcs il_drv2mhz
+
+                lda #<drv_init
+                sta il_mestring+1
+                lda #>drv_init
+                sta il_mestring
 
                 lda #<drivecode_c64
                 ldx #>drivecode_c64
                 ldy #(drivecodeend_drv-drivecode_drv+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
+;                bne il_begin
+
+il_drv2mhz:
+
 il_begin:       sta il_senddata+1
                 stx il_senddata+2
                 sty loadtempreg         ;Number of "packets" to send
@@ -194,7 +204,14 @@ il_sendme:      lda il_mestring,x       ;Send M-E command (backwards)
                 jmp unlsn               ;Start drivecode
 
 initloader:     jsr initloader1
-initloader2:
+
+initloader2:    lda usefastload
+                bne il_ok
+                lda #$11
+                sec
+                rts
+
+il_ok:
                 if TWOBIT_PROTOCOL=0
 il_wait:        bit $dd00               ;Wait for 1541 to signal drv_init
                 bvs il_wait             ;started by setting CLK low
@@ -288,6 +305,13 @@ il_driveend:
 ;-------------------------------------------------------------------------------
 
 il_mrstring:    dc.b 2,>ild_return1,<ild_return1,"R-M"
+
+;-------------------------------------------------------------------------------
+; Loader configuration
+;-------------------------------------------------------------------------------
+
+usefastload:    dc.b 0                          ;If nonzero, fastloading will
+                                                ;be used (autoconfigured)
 
 ;-------------------------------------------------------------------------------
 ; Drivecode
