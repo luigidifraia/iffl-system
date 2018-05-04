@@ -254,7 +254,7 @@ drv_scanfileok: sta drvoffstbl,y        ;Store file offset
                 inc drvtemp2            ;Increment file counter
                 bpl drv_scanfile        ;Fill up the table, then exit
                 lda #$00
-                beq drv_scandone
+                beq drv_scanok
 
 drv_scannext:   lda drvcntl             ;Now subtract 254 bytes from the counter
                 sec                     ;as we go to the next sector
@@ -268,7 +268,7 @@ drv_scannextok: ldx buf2sct
                 lda drvtrklinktbl,x     ;Get next track from our linktable
                 cmp buf2trk
                 beq drv_scanfile        ;If same track, go back to loop for
-drv_scandone:   sta buf2trk             ;files
+drv_scanok:     sta buf2trk             ;files
                 jmp returnok            ;Otherwise, have to return from the
                                         ;job execution, and execute again
 drv_scan5bytes: sta buflo
