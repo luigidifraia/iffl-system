@@ -18,4 +18,5 @@ IF %ERRORLEVEL% GEQ 1 EXIT /B 1
 dasm tst_bb2.s -oiffl_bb2.prg
 IF %ERRORLEVEL% GEQ 1 EXIT /B 1
 makedisk iffl_bb2.d64 iffl_bb2.seq "IFFL EXAMPLE      IF 2A" 10
+c1541 < iffl_bb2_1581.seq
 DEL sprites.prg.b2 music.prg.b2 bitmap.prg.b2 video_ram.prg.b2 color_ram.prg.b2 sprites_and_music_data_bb2_linked picture_data_bb2_linked iffldata_bb2 iffl_bb2.prg
