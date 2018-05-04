@@ -605,12 +605,12 @@ dr_init_1mhz:
                                         ;file number
 
 .dr_scanexec:   lda #$e0                ;Use the seek/execute jobcode
-                sta buf2cmd_1mhz        ;(.dr_scan at $500 gets executed)
+                sta buf2cmd_1mhz        ;(.dr_scan at $0500 gets executed)
                 cli
 .dr_scanwait:   lda buf2cmd_1mhz
                 bmi .dr_scanwait
                 sei
-                cmp #$02                ;If error, abort
+                cmp #$02
                 rts
 
 ;-------------------------------------------------------------------------------
