@@ -10,4 +10,5 @@ IF %ERRORLEVEL% GEQ 1 EXIT /B 1
 dasm tst_exom_linked.s -oiffl_exom_linked.prg
 IF %ERRORLEVEL% GEQ 1 EXIT /B 1
 makedisk iffl_exom_linked.d64 iffl_exom_linked.seq "IFFL EXAMPLE      IF 2A" 10
+c1541 < iffl_exom_linked_1581.seq
 DEL data_exom_linked iffldata_exom_linked iffl_exom_linked.prg
