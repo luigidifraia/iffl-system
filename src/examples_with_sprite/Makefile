@@ -3,13 +3,19 @@
 # Note: the extended version of the ByteBoozer2 cruncher is used here
 # https://github.com/luigidifraia/ByteBoozer2/tree/master/b2
 
-all: iffl_bb2.d64 iffl_unp.d64
+all: iffl_bb2.d81 iffl_unp.d81
 
 clean:
 	rm -f *.d64 *.b2 iffl_*.prg iffldata_* picture_data_bb2_linked
 
+iffl_bb2.d81: iffl_bb2.d64 iffl_bb2_1581.seq
+	c1541 < iffl_bb2_1581.seq
+
 iffl_bb2.d64: iffl_bb2.prg iffldata_bb2 iffl_bb2.seq
 	makedisk $@ iffl_bb2.seq "IFFL EXAMPLE      IF 2A" 10
+
+iffl_unp.d81: iffl_unp.d64 iffl_unp_1581.seq
+	c1541 < iffl_unp_1581.seq
 
 iffl_unp.d64: iffl_unp.prg iffldata_unp iffl_unp.seq
 	makedisk $@ iffl_unp.seq "IFFL EXAMPLE      IF 2A" 10
