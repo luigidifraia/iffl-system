@@ -325,6 +325,8 @@ usefastload:    dc.b 0                          ;If nonzero, fastloading will
 .bufhi          = .buflo+1              ;Buffer address highbyte
 .sectors        = $43                   ;Amount of sectors on current track
 
+.busport        = $1800
+
 returnok        = $f505                 ;Return from job exec with OK code
 waitsync        = $f556                 ;Wait for SYNC
 decode          = $f7e8                 ;Decode 5 GCR bytes, bufferindex in Y
@@ -423,7 +425,7 @@ drivecode_drv_1mhz:
 dr_init_1mhz:
                 if TWOBIT_PROTOCOL=0
                 lda #$08                ;Set CLK=low to tell C64 there's no data to
-                sta $1800               ;be read yet
+                sta .busport            ;be read yet
                 endif
 
                 lda #18                 ;Read first dir sector
@@ -488,15 +490,15 @@ dr_init_1mhz:
 
 .dr_mainloop:
                 if TWOBIT_PROTOCOL=0
-                lda $1800               ;Set CLK=High
+                lda .busport            ;Set CLK=High
                 and #$f7
-                sta $1800
+                sta .busport
                 lda #$04
 .dr_mainfilewait:
-                bit $1800               ;Wait for CLK=High
+                bit .busport            ;Wait for CLK=High
                 bne .dr_mainfilewait
                 ldy #$00                ;Set DATA=High
-                sty $1800
+                sty .busport
                 endif
 
                 cli                     ;Allow interrupts so drive may stop
@@ -505,7 +507,7 @@ dr_init_1mhz:
 
                 if TWOBIT_PROTOCOL=0
                 lda #$08                ;Set CLK=low to tell C64 there's no data to
-                sta $1800               ;be read yet
+                sta .busport            ;be read yet
                 endif
 
                 lda .drvoffstbl,y       ;Get file start offset
@@ -610,32 +612,32 @@ dr_init_1mhz:
                 lsr
                 tax
                 lda #$04
-.dr_sendwait:   bit $1800               ;Wait for CLK==low
+.dr_sendwait:   bit .busport            ;Wait for CLK==low
                 beq .dr_sendwait
                 lsr                     ;Set DATA=low
-                sta $1800
+                sta .busport
                 lda .dr_sendtbl,x       ;Get the CLK,DATA pairs for low nybble
                 pha
                 lda .drvtemp
                 and #$0f
                 tax
                 lda #$04
-.dr_sendwait2:  bit $1800               ;Wait for CLK==high (start of high speed transfer)
+.dr_sendwait2:  bit .busport            ;Wait for CLK==high (start of high speed transfer)
                 bne .dr_sendwait2
                 lda .dr_sendtbl,x       ;Get the CLK,DATA pairs for high nybble
-                sta $1800
+                sta .busport
                 asl
                 and #$0f
-                sta $1800
+                sta .busport
                 pla
-                sta $1800
+                sta .busport
                 asl
                 and #$0f
-                sta $1800
+                sta .busport
                 nop
                 nop
                 lda #$00
-                sta $1800               ;Finish send: DATA & CLK both high
+                sta .busport            ;Finish send: DATA & CLK both high
 
                 else
 
@@ -643,29 +645,29 @@ dr_init_1mhz:
                 tya                     ;Store Y-register contents
                 pha
                 ldy #$04
-                lda $1800
+                lda .busport
                 and #$f7
-                sta $1800
+                sta .busport
                 tya
 .s1:            asl .drvtemp            ;Rotate bit to carry and "invert"
                 ldx #$02
                 bcc .s2
                 ldx #$00
-.s2:            bit $1800
+.s2:            bit .busport
                 bne .s2
-                stx $1800
+                stx .busport
                 asl .drvtemp
                 ldx #$02
                 bcc .s3
                 ldx #$00
-.s3:            bit $1800
+.s3:            bit .busport
                 beq .s3
-                stx $1800
+                stx .busport
                 dey
                 bne .s1
                 txa
                 ora #$08
-                sta $1800
+                sta .busport
                 pla
                 tay
                 endif
@@ -689,21 +691,21 @@ dr_init_1mhz:
 
 .dr_getbyte:    ldy #$08                ;Counter: receive 8 bits
 .dr_recvbit:    lda #$85
-                and $1800               ;Wait for CLK==low || DATA==low
+                and .busport            ;Wait for CLK==low || DATA==low
                 bmi .dr_gotatn          ;Quit if ATN was asserted
                 beq .dr_recvbit
                 lsr                     ;Read the data bit
                 lda #2                  ;Prepare for CLK=high, DATA=low
                 bcc .dr_rskip
                 lda #8                  ;Prepare for CLK=low, DATA=high
-.dr_rskip:      sta $1800               ;Acknowledge the bit received
+.dr_rskip:      sta .busport            ;Acknowledge the bit received
                 ror .drvtemp2           ;and store it
-.dr_rwait:      lda $1800               ;Wait for CLK==high || DATA==high
+.dr_rwait:      lda .busport            ;Wait for CLK==high || DATA==high
                 and #5
                 eor #5
                 beq .dr_rwait
                 lda #0
-                sta $1800               ;Set CLK=DATA=high
+                sta .busport            ;Set CLK=DATA=high
                 dey
                 bne .dr_recvbit         ;Loop until all bits have been received
                 lda .drvtemp2           ;Return the data to A
@@ -785,6 +787,8 @@ drivecodeend_c64_drv_1mhz:
 ;.iddrv0         = $??                   ;Disk drive ID
 ;.id             = $1d                   ;Disk ID
 
+.busport        = $4001
+
 ;-------------------------------------------------------------------------------
 ; Drivecode for 2MHz drives
 ;-------------------------------------------------------------------------------
@@ -856,7 +860,7 @@ drivecode_drv_2mhz:
 dr_init_2mhz:
                 if TWOBIT_PROTOCOL=0
                 lda #$08                ;Set CLK=low to tell C64 there's no data to
-                sta $4001               ;be read yet
+                sta .busport            ;be read yet
                 endif
 
                 lda #40                 ;Read first dir sector
@@ -921,15 +925,15 @@ dr_init_2mhz:
 
 .dr_mainloop:
                 if TWOBIT_PROTOCOL=0
-                lda $4001               ;Set CLK=High
+                lda .busport            ;Set CLK=High
                 and #$f7
-                sta $4001
+                sta .busport
                 lda #$04
 .dr_mainfilewait:
-                bit $4001               ;Wait for CLK=High
+                bit .busport            ;Wait for CLK=High
                 bne .dr_mainfilewait
                 ldy #$00                ;Set DATA=High
-                sty $4001
+                sty .busport
                 endif
 
                 cli                     ;Allow interrupts so drive may stop
@@ -938,7 +942,7 @@ dr_init_2mhz:
 
                 if TWOBIT_PROTOCOL=0
                 lda #$08                ;Set CLK=low to tell C64 there's no data to
-                sta $4001               ;be read yet
+                sta .busport            ;be read yet
                 endif
 
                 lda .drvoffstbl,y       ;Get file start offset
@@ -1034,38 +1038,38 @@ dr_init_2mhz:
                 lsr
                 tax
                 lda #$04
-.dr_sendwait:   bit $4001               ;Wait for CLK==low
+.dr_sendwait:   bit .busport            ;Wait for CLK==low
                 beq .dr_sendwait
                 lsr                     ;Set DATA=low
-                sta $4001
+                sta .busport
                 lda .dr_sendtbl,x       ;Get the CLK,DATA pairs for low nybble
                 pha
                 lda .drvtemp
                 and #$0f
                 tax
                 lda #$04
-.dr_sendwait2:  bit $4001               ;Wait for CLK==high (start of high speed transfer)
+.dr_sendwait2:  bit .busport            ;Wait for CLK==high (start of high speed transfer)
                 bne .dr_sendwait2
                 lda .dr_sendtbl,x       ;Get the CLK,DATA pairs for high nybble
-                sta $4001
+                sta .busport
                 jsr .dr_delay18
                 nop
                 asl
                 and #$0f
-                sta $4001
+                sta .busport
                 cmp ($00,x)
                 nop
                 pla
-                sta $4001
+                sta .busport
                 cmp ($00,x)
                 nop
                 asl
                 and #$0f
-                sta $4001
+                sta .busport
                 ldx #$00
                 nop
                 jsr .dr_delay12
-                stx $4001               ;Finish send: DATA & CLK both high
+                stx .busport            ;Finish send: DATA & CLK both high
 
                 else
 
@@ -1073,29 +1077,29 @@ dr_init_2mhz:
                 tya                     ;Store Y-register contents
                 pha
                 ldy #$04
-                lda $4001
+                lda .busport
                 and #$f7
-                sta $4001
+                sta .busport
                 tya
 .s1:            asl .drvtemp            ;Rotate bit to carry and "invert"
                 ldx #$02
                 bcc .s2
                 ldx #$00
-.s2:            bit $4001
+.s2:            bit .busport
                 bne .s2
-                stx $4001
+                stx .busport
                 asl .drvtemp
                 ldx #$02
                 bcc .s3
                 ldx #$00
-.s3:            bit $4001
+.s3:            bit .busport
                 beq .s3
-                stx $4001
+                stx .busport
                 dey
                 bne .s1
                 txa
                 ora #$08
-                sta $4001
+                sta .busport
                 pla
                 tay
                 endif
@@ -1122,21 +1126,21 @@ dr_init_2mhz:
 
 .dr_getbyte:    ldy #$08                ;Counter: receive 8 bits
 .dr_recvbit:    lda #$85
-                and $4001               ;Wait for CLK==low || DATA==low
+                and .busport            ;Wait for CLK==low || DATA==low
                 bmi .dr_gotatn          ;Quit if ATN was asserted
                 beq .dr_recvbit
                 lsr                     ;Read the data bit
                 lda #2                  ;Prepare for CLK=high, DATA=low
                 bcc .dr_rskip
                 lda #8                  ;Prepare for CLK=low, DATA=high
-.dr_rskip:      sta $4001               ;Acknowledge the bit received
+.dr_rskip:      sta .busport            ;Acknowledge the bit received
                 ror .drvtemp2           ;and store it
-.dr_rwait:      lda $4001               ;Wait for CLK==high || DATA==high
+.dr_rwait:      lda .busport            ;Wait for CLK==high || DATA==high
                 and #5
                 eor #5
                 beq .dr_rwait
                 lda #0
-                sta $4001               ;Set CLK=DATA=high
+                sta .busport            ;Set CLK=DATA=high
                 dey
                 bne .dr_recvbit         ;Loop until all bits have been received
                 lda .drvtemp2           ;Return the data to A
