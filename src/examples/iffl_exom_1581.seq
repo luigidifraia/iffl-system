@@ -1,0 +1,6 @@
+format ifflexample,le d81 iffl_exom.d81 8
+attach iffl_exom.d64 9
+copy @9:"iffl example" @8:
+copy @9:"iffldata" @8:
+exit
+
