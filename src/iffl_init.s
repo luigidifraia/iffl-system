@@ -343,16 +343,10 @@ drv_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
 ;                sta drvcnth             ;TODO: Already 0 after a reset
                 lda drvbuf              ;Now get the next T/S (where actual
                 sta buf2trk             ;data starts) and perform the scanning
-                lda drvbuf+1            ;with the seek/execute jobcode
-                sta buf2sct             ;(drv_scan at $500 gets executed)
-drv_scanloop:   lda #$e0
-                sta buf2cmd
-                cli
-drv_scanwait:   lda buf2cmd
-                bmi drv_scanwait
-                sei
-                cmp #$02                ;If error, abort
-                bcs drv_initfail
+                lda drvbuf+1
+                sta buf2sct
+drv_scanloop:   jsr drv_scanexec
+                bcs drv_initfail        ;If error, abort
                 lda buf2trk             ;Keep calling the job until the file is
                 bne drv_scanloop        ;at an end
                 jsr drv_sendbyte        ;Now A=0, send the byte so that C64
@@ -460,6 +454,15 @@ drv_mainfilefail:
                 jmp drv_mainloop        ;Then go back to main to wait for
                                         ;file number
 
+drv_scanexec:   lda #$e0                ;Use the seek/execute jobcode
+                sta buf2cmd             ;(drv_scan at $500 gets executed)
+                cli
+drv_scanwait:   lda buf2cmd
+                bmi drv_scanwait
+                sei
+                cmp #$02                ;If error, abort
+                rts
+
 ;-------------------------------------------------------------------------------
 ; Subroutine: send byte in A to C64; with 2-bit protocol no IRQs are allowed.
 ;-------------------------------------------------------------------------------
@@ -540,6 +543,9 @@ s3:             bit $1800
 ;-------------------------------------------------------------------------------
 
                 if TWOBIT_PROTOCOL>0
+drv_delay18:    cmp ($00,x)
+drv_delay12:    rts
+
 drv_sendtbl:    dc.b $0f,$07,$0d,$05
                 dc.b $0b,$03,$09,$01
                 dc.b $0e,$06,$0c,$04
@@ -587,19 +593,12 @@ drv_readsector2:
                 endif
                 ldy #RETRIES            ;Retry counter
 drv_readsectorretry:
-                lda #$80
-                sta buf1cmd
-                cli
-drv_readsectorpoll:
-                lda buf1cmd
-                bmi drv_readsectorpoll
+                lda #$80                ;Job code: read sector
+                jsr drv_readexec
                 sei
                 cmp #$02                ;Errorcode
                 bcc drv_readsectorok
-                ldx id                  ;Handle possible disk ID change
-                stx iddrv0
-                ldx id+1
-                stx iddrv0+1
+                jsr drv_idchange
                 dey                     ;Decrement retry counter and try again
                 bne drv_readsectorretry
 drv_readsectorok:
@@ -608,6 +607,19 @@ drv_led:        lda #$08                ;Flash the drive LED
 drv_ledac1:     eor $1c00
 drv_ledac2:     sta $1c00
                 endif
+                rts
+
+drv_readexec:   sta buf1cmd             ;Buffer 1 job
+                cli
+drv_readsectorpoll:
+                lda buf1cmd
+                bmi drv_readsectorpoll
+                rts
+
+drv_idchange:   ldx id                  ;Handle possible disk ID change
+                stx iddrv0
+                ldx id+1
+                stx iddrv0+1
                 rts
 
 ;-------------------------------------------------------------------------------
