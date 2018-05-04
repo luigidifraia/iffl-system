@@ -13,4 +13,5 @@ IF %ERRORLEVEL% GEQ 1 EXIT /B 1
 dasm tst_pucr.s -oiffl_pucr.prg
 IF %ERRORLEVEL% GEQ 1 EXIT /B 1
 makedisk iffl_pucr.d64 iffl_pucr.seq "IFFL EXAMPLE      IF 2A" 10
+c1541 < iffl_pucr_1581.seq
 DEL music.puc picture.puc iffldata_pucr iffl_pucr.prg
