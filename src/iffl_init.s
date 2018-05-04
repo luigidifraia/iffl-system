@@ -172,9 +172,9 @@ il_fastloadko:  rts
 il_fastloadok:  cpx #$01
                 bcs il_drv2mhz
 
-                lda #<drv_init
+                lda #<dr_init_1mhz
                 sta il_mestring+1
-                lda #>drv_init
+                lda #>dr_init_1mhz
                 sta il_mestring
 
                 lda #<drivecode_c64_drv_1mhz
@@ -185,9 +185,9 @@ il_fastloadok:  cpx #$01
 il_drv2mhz:     cpx #$02
                 bcs il_fastloadko
 
-                lda #<drh_init
+                lda #<dr_init_2mhz
                 sta il_mestring+1
-                lda #>drh_init
+                lda #>dr_init_2mhz
                 sta il_mestring
 
                 lda #<drivecode_c64_drv_2mhz
@@ -344,11 +344,11 @@ il_mrstring:    dc.b 2,>ild_return1,<ild_return1,"R-M"
 usefastload:    dc.b 0                          ;If nonzero, fastloading will
                                                 ;be used (autoconfigured)
 
-                subroutine drv_1mhz
-
 ;-------------------------------------------------------------------------------
 ; Drivecode for 1MHz drives
 ;-------------------------------------------------------------------------------
+
+                subroutine drv_1mhz
 
 drivecode_c64_drv_1mhz:
                 rorg drvstart
@@ -358,17 +358,17 @@ drivecode_drv_1mhz:
 ; Subroutine: scan the IFFL file (executed via jobcode $e0)
 ;-------------------------------------------------------------------------------
 
-drv_scan:       lda #>drvbuf
+.dr_scan:       lda #>drvbuf
                 sta bufhi_1mhz
                 lda sectors_1mhz
                 sta drvtemp_1mhz
-drv_scansector: lda #<drvbuf            ;Read sector header to $0400
-                jsr drv_scan5bytes
+.dr_scansector: lda #<drvbuf            ;Read sector header to $0400
+                jsr .dr_scan5bytes
                 lda drvbuf              ;Check for correct header
                 cmp #$52
-                bne drv_scansector
+                bne .dr_scansector
                 lda #<drvbuf+5          ;Read data beginning to $0405
-                jsr drv_scan5bytes
+                jsr .dr_scan5bytes
                 ldy #$00
                 sty buflo_1mhz
                 jsr decode_1mhz         ;Decode the header
@@ -383,15 +383,15 @@ drv_scansector: lda #<drvbuf            ;Read sector header to $0400
                 lda $54                 ;through the sectors later
                 sta drvsctlinktbl_1mhz,x
                 dec drvtemp_1mhz        ;Loop until all sectors scanned
-                bne drv_scansector
+                bne .dr_scansector
 
-drv_scanfile:   ldy drvtemp2_1mhz       ;Current file number
+.dr_scanfile:   ldy drvtemp2_1mhz       ;Current file number
                 lda drvcnth_1mhz        ;See if the byte counter is less than
-                bne drv_scannext        ;254, otherwise go to next sector
+                bne .dr_scannext        ;254, otherwise go to next sector
                 lda drvcntl_1mhz
                 cmp #254
-                bcs drv_scannext
-drv_scanfileok: sta drvoffstbl_1mhz,y   ;Store file offset
+                bcs .dr_scannext
+.dr_scanfileok: sta drvoffstbl_1mhz,y   ;Store file offset
                 adc drvlentbllo,y       ;Now add this file's length to the
                 sta drvcntl_1mhz        ;byte counter
                 lda drvcnth_1mhz
@@ -402,41 +402,41 @@ drv_scanfileok: sta drvoffstbl_1mhz,y   ;Store file offset
                 lda buf2sct_1mhz        ;it's no longer needed at this point)
                 sta drvscttbl,y
                 inc drvtemp2_1mhz       ;Increment file counter
-                bpl drv_scanfile        ;Fill up the table, then exit
+                bpl .dr_scanfile        ;Fill up the table, then exit
                 lda #$00
-                beq drv_scanok
+                beq .dr_scanok
 
-drv_scannext:   lda drvcntl_1mhz        ;Now subtract 254 bytes from the counter
+.dr_scannext:   lda drvcntl_1mhz        ;Now subtract 254 bytes from the counter
                 sec                     ;as we go to the next sector
                 sbc #254
                 sta drvcntl_1mhz
-                bcs drv_scannextok
+                bcs .dr_scannextok
                 dec drvcnth_1mhz
-drv_scannextok: ldx buf2sct_1mhz
+.dr_scannextok: ldx buf2sct_1mhz
                 lda drvsctlinktbl_1mhz,x ;Get next sector from our linktable
                 sta buf2sct_1mhz
                 lda drvtrklinktbl_1mhz,x ;Get next track from our linktable
                 cmp buf2trk_1mhz
-                beq drv_scanfile        ;If same track, go back to loop for
-drv_scanok:     sta buf2trk_1mhz        ;files
+                beq .dr_scanfile        ;If same track, go back to loop for
+.dr_scanok:     sta buf2trk_1mhz        ;files
                 jmp returnok_1mhz       ;Otherwise, have to return from the
                                         ;job execution, and execute again
-drv_scan5bytes: sta buflo_1mhz
+.dr_scan5bytes: sta buflo_1mhz
                 jsr waitsync_1mhz       ;Wait for SYNC (clears Y)
-drv_5byteloop:  bvc drv_5byteloop       ;Wait for data from the R/W head
+.dr_5byteloop:  bvc .dr_5byteloop       ;Wait for data from the R/W head
                 clv
                 lda $1c01
                 sta (buflo_1mhz),y
                 iny
                 cpy #$05                ;Read 5 GCR bytes
-                bne drv_5byteloop
+                bne .dr_5byteloop
                 rts
 
 ;-------------------------------------------------------------------------------
 ; Drive main code
 ;-------------------------------------------------------------------------------
 
-drv_init:
+dr_init_1mhz:
                 if TWOBIT_PROTOCOL=0
                 lda #$08                ;Set CLK=low to tell C64 there's no data to
                 sta $1800               ;be read yet
@@ -444,47 +444,47 @@ drv_init:
 
                 lda #18                 ;Read first dir sector
                 ldx #1
-drv_dirsctloop: jsr drv_readsector
-                bcs drv_initfail
+.dr_dirsctloop: jsr .dr_readsector
+                bcs .dr_initfail
                 ldy #$02
-drv_fileloop:   lda drvbuf,y            ;File type must be PRG
+.dr_fileloop:   lda drvbuf,y            ;File type must be PRG
                 and #$83
                 cmp #$82
-                bne drv_nextfile
-                sty drv_namecmp+1
+                bne .dr_nextfile
+                sty .dr_namecmp+1
                 ldx #$03
                 lda #$a0                ;Make an endmark at the 16th letter
                 sta drvbuf+19,y
-drv_namecmp:    lda drvbuf,x
-                cmp drv_filename-3,x    ;Check against each letter of filename
-                bne drv_namedone        ;until at the endzero
+.dr_namecmp:    lda drvbuf,x
+                cmp .dr_filename-3,x    ;Check against each letter of filename
+                bne .dr_namedone        ;until at the endzero
                 inx
-                bne drv_namecmp
-drv_namedone:   cmp #$a0                ;If got to a $a0, name correct
-                beq drv_found
-drv_nextfile:   tya
+                bne .dr_namecmp
+.dr_namedone:   cmp #$a0                ;If got to a $a0, name correct
+                beq .dr_found
+.dr_nextfile:   tya
                 clc
                 adc #$20                ;Go to next file
                 tay
-                bcc drv_fileloop
-drv_nextdirsct: ldx drvbuf+1
+                bcc .dr_fileloop
+.dr_nextdirsct: ldx drvbuf+1
                 lda drvbuf              ;Any more dir sectors?
-                bne drv_dirsctloop      ;Errorcode $10 not used by 1541
+                bne .dr_dirsctloop      ;Errorcode $10 not used by 1541
                 lda #$10                ;so use it as "IFFL file not found"
-drv_initfail:   jsr drv_sendbyte        ;Send error code & exit through
-drv_quit:       jmp initialize_1mhz     ;INITIALIZE
+.dr_initfail:   jsr .dr_sendbyte        ;Send error code & exit through
+.dr_quit:       jmp initialize_1mhz     ;INITIALIZE
 
-drv_found:      lda drvbuf+1,y          ;IFFL datafile found, get its start
+.dr_found:      lda drvbuf+1,y          ;IFFL datafile found, get its start
                 ldx drvbuf+2,y          ;track & sector
-                jsr drv_readsector
-                bcs drv_initfail
+                jsr .dr_readsector
+                bcs .dr_initfail
                 ldy #MAXFILES-1
-drv_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
+.dr_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
                 sta drvlentbllo,y       ;Copy them to the length tables
                 lda drvbuf+2+MAXFILES,y
                 sta drvlentblhi,y
                 dey
-                bpl drv_copylentbl
+                bpl .dr_copylentbl
                 lda #$00                ;Clear the length of the last file
                 sta drvlentbllo+MAXFILES ;in case we have full 127 files
                 sta drvlentblhi+MAXFILES
@@ -495,28 +495,28 @@ drv_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
                 sta buf2trk_1mhz        ;data starts) and perform the scanning
                 lda drvbuf+1
                 sta buf2sct_1mhz
-drv_scanloop:   jsr drv_scanexec
-                bcs drv_initfail        ;If error, abort
+.dr_scanloop:   jsr .dr_scanexec
+                bcs .dr_initfail        ;If error, abort
                 lda buf2trk_1mhz        ;Keep calling the job until the file is
-                bne drv_scanloop        ;at an end
-                jsr drv_sendbyte        ;Now A=0, send the byte so that C64
+                bne .dr_scanloop        ;at an end
+                jsr .dr_sendbyte        ;Now A=0, send the byte so that C64
                                         ;knows the file was scanned successfully
 
-drv_mainloop:
+.dr_mainloop:
                 if TWOBIT_PROTOCOL=0
                 lda $1800               ;Set CLK=High
                 and #$f7
                 sta $1800
                 lda #$04
-drv_mainfilewait:
+.dr_mainfilewait:
                 bit $1800               ;Wait for CLK=High
-                bne drv_mainfilewait
+                bne .dr_mainfilewait
                 ldy #$00                ;Set DATA=High
                 sty $1800
                 endif
 
                 cli                     ;Allow interrupts so drive may stop
-                jsr drv_getbyte         ;Get file number from C64
+                jsr .dr_getbyte         ;Get file number from C64
                 tay                     ;(file number also now in drvtemp2_1mhz)
 
                 if TWOBIT_PROTOCOL=0
@@ -525,90 +525,90 @@ drv_mainfilewait:
                 endif
 
                 lda drvoffstbl_1mhz,y   ;Get file start offset
-                sta drv_mainsendstart+1
+                sta .dr_mainsendstart+1
                 lda drvtrktbl,y         ;Get file start track & sector
                 sta buf1trk_1mhz
                 lda drvscttbl,y
                 sta buf1sct_1mhz
 
-drv_mainsctloop:ldy drvtemp2_1mhz       ;Get the file number back
+.dr_mainsctloop:ldy drvtemp2_1mhz       ;Get the file number back
                 ldx #$fe                ;Assume we'll send a full sector (254b.)
                 lda buf1trk_1mhz        ;If we're on the startsector of the
                 cmp drvtrktbl+1,y       ;next file, we can only send up to the
-                bne drv_mainnotlast     ;next file's startoffset
+                bne .dr_mainnotlast     ;next file's startoffset
                 lda buf1sct_1mhz
                 cmp drvscttbl+1,y
-                bne drv_mainnotlast
+                bne .dr_mainnotlast
                 ldx drvoffstbl_1mhz+1,y ;If endoffset = startoffset, we're
-                cpx drv_mainsendstart+1 ;already on the next file and can't
-                beq drv_mainfiledone    ;send anything
-drv_mainnotlast:stx drv_mainsendend+1
-                jsr drv_readsector2     ;Read sector, abort if failed
-                bcs drv_mainfilefail
+                cpx .dr_mainsendstart+1 ;already on the next file and can't
+                beq .dr_mainfiledone    ;send anything
+.dr_mainnotlast:stx .dr_mainsendend+1
+                jsr .dr_readsector2     ;Read sector, abort if failed
+                bcs .dr_mainfilefail
 
                 if RECEIVE_BUFFER=0
-                lda drv_mainsendend+1
+                lda .dr_mainsendend+1
                 cmp #$fe
                 php
                 sec
-                sbc drv_mainsendstart+1 ;Get amount of bytes to send
-                jsr drv_sendbyte
-drv_mainsendstart:
+                sbc .dr_mainsendstart+1 ;Get amount of bytes to send
+                jsr .dr_sendbyte
+.dr_mainsendstart:
                 ldy #$00
-drv_mainsendloop:
+.dr_mainsendloop:
                 iny
                 lda drvbuf+1,y          ;Send buffer
-                jsr drv_sendbyte
-drv_mainsendend:
+                jsr .dr_sendbyte
+.dr_mainsendend:
                 cpy #$00
-                bne drv_mainsendloop
+                bne .dr_mainsendloop
                 plp                     ;See if it was a partial sector
-                bne drv_mainfiledone    ;(last one)
+                bne .dr_mainfiledone    ;(last one)
 
                 else
 
-drv_mainsendend:ldy #$00
+.dr_mainsendend:ldy #$00
                 cpy #$fe
                 php
                 tya
                 sec
-                sbc drv_mainsendstart+1 ;Get amount of bytes to send
-                jsr drv_sendbyte
-drv_mainsendloop:
+                sbc .dr_mainsendstart+1 ;Get amount of bytes to send
+                jsr .dr_sendbyte
+.dr_mainsendloop:
                 lda drvbuf+1,y          ;Send buffer backwards
-                jsr drv_sendbyte
+                jsr .dr_sendbyte
                 dey
-drv_mainsendstart:
+.dr_mainsendstart:
                 cpy #$00
-                bne drv_mainsendloop
+                bne .dr_mainsendloop
                 plp                     ;See if it was a partial sector
-                bne drv_mainfiledone    ;(last one)
+                bne .dr_mainfiledone    ;(last one)
                 endif
 
-drv_mainnextsct:lda #$00
-                sta drv_mainsendstart+1 ;Startoffset for next sector is 0
+.dr_mainnextsct:lda #$00
+                sta .dr_mainsendstart+1 ;Startoffset for next sector is 0
                 lda drvbuf+1            ;Follow the T/S link
                 sta buf1sct_1mhz
                 lda drvbuf
                 sta buf1trk_1mhz        ;Go back to send the next sector,
-                bne drv_mainsctloop     ;unless IFFL file end encountered
-drv_mainfiledone:
+                bne .dr_mainsctloop     ;unless IFFL file end encountered
+.dr_mainfiledone:
                 lda #$00                ;Errorcode 0: all OK
-drv_mainfilefail:
+.dr_mainfilefail:
                 pha                     ;File end: send $00 and errorcode
                 lda #$00
-                jsr drv_sendbyte
+                jsr .dr_sendbyte
                 pla
-                jsr drv_sendbyte
+                jsr .dr_sendbyte
 
-                jmp drv_mainloop        ;Then go back to main to wait for
+                jmp .dr_mainloop        ;Then go back to main to wait for
                                         ;file number
 
-drv_scanexec:   lda #$e0                ;Use the seek/execute jobcode
-                sta buf2cmd_1mhz        ;(drv_scan at $500 gets executed)
+.dr_scanexec:   lda #$e0                ;Use the seek/execute jobcode
+                sta buf2cmd_1mhz        ;(.dr_scan at $500 gets executed)
                 cli
-drv_scanwait:   lda buf2cmd_1mhz
-                bmi drv_scanwait
+.dr_scanwait:   lda buf2cmd_1mhz
+                bmi .dr_scanwait
                 sei
                 cmp #$02                ;If error, abort
                 rts
@@ -617,7 +617,7 @@ drv_scanwait:   lda buf2cmd_1mhz
 ; Subroutine: send byte in A to C64; with 2-bit protocol no IRQs are allowed.
 ;-------------------------------------------------------------------------------
 
-drv_sendbyte:
+.dr_sendbyte:
                 if TWOBIT_PROTOCOL>0
                 sta drvtemp_1mhz
                 lsr
@@ -626,19 +626,19 @@ drv_sendbyte:
                 lsr
                 tax
                 lda #$04
-drv_sendwait:   bit $1800               ;Wait for CLK==low
-                beq drv_sendwait
+.dr_sendwait:   bit $1800               ;Wait for CLK==low
+                beq .dr_sendwait
                 lsr                     ;Set DATA=low
                 sta $1800
-                lda drv_sendtbl,x       ;Get the CLK,DATA pairs for low nybble
+                lda .dr_sendtbl,x       ;Get the CLK,DATA pairs for low nybble
                 pha
                 lda drvtemp_1mhz
                 and #$0f
                 tax
                 lda #$04
-drv_sendwait2:  bit $1800               ;Wait for CLK==high (start of high speed transfer)
-                bne drv_sendwait2
-                lda drv_sendtbl,x       ;Get the CLK,DATA pairs for high nybble
+.dr_sendwait2:  bit $1800               ;Wait for CLK==high (start of high speed transfer)
+                bne .dr_sendwait2
+                lda .dr_sendtbl,x       ;Get the CLK,DATA pairs for high nybble
                 sta $1800
                 asl
                 and #$0f
@@ -693,7 +693,7 @@ drv_sendwait2:  bit $1800               ;Wait for CLK==high (start of high speed
 ;-------------------------------------------------------------------------------
 
                 if TWOBIT_PROTOCOL>0
-drv_sendtbl:    dc.b $0f,$07,$0d,$05
+.dr_sendtbl:    dc.b $0f,$07,$0d,$05
                 dc.b $0b,$03,$09,$01
                 dc.b $0e,$06,$0c,$04
                 dc.b $0a,$02,$08,$00
@@ -703,67 +703,67 @@ drv_sendtbl:    dc.b $0f,$07,$0d,$05
 ; Subroutine: get byte from C64 in A
 ;-------------------------------------------------------------------------------
 
-drv_getbyte:    ldy #$08                ;Counter: receive 8 bits
-drv_recvbit:    lda #$85
+.dr_getbyte:    ldy #$08                ;Counter: receive 8 bits
+.dr_recvbit:    lda #$85
                 and $1800               ;Wait for CLK==low || DATA==low
-                bmi drv_gotatn          ;Quit if ATN was asserted
-                beq drv_recvbit
+                bmi .dr_gotatn          ;Quit if ATN was asserted
+                beq .dr_recvbit
                 lsr                     ;Read the data bit
                 lda #2                  ;Prepare for CLK=high, DATA=low
-                bcc drv_rskip
+                bcc .dr_rskip
                 lda #8                  ;Prepare for CLK=low, DATA=high
-drv_rskip:      sta $1800               ;Acknowledge the bit received
+.dr_rskip:      sta $1800               ;Acknowledge the bit received
                 ror drvtemp2_1mhz       ;and store it
-drv_rwait:      lda $1800               ;Wait for CLK==high || DATA==high
+.dr_rwait:      lda $1800               ;Wait for CLK==high || DATA==high
                 and #5
                 eor #5
-                beq drv_rwait
+                beq .dr_rwait
                 lda #0
                 sta $1800               ;Set CLK=DATA=high
                 dey
-                bne drv_recvbit         ;Loop until all bits have been received
+                bne .dr_recvbit         ;Loop until all bits have been received
                 lda drvtemp2_1mhz       ;Return the data to A
                 rts
-drv_gotatn:     pla                     ;If ATN gets asserted, exit to the operating
+.dr_gotatn:     pla                     ;If ATN gets asserted, exit to the operating
                 pla                     ;system. Discard the return address and
-                jmp drv_quit            ;jump to the INITIALIZE routine
+                jmp .dr_quit            ;jump to the INITIALIZE routine
 
 ;-------------------------------------------------------------------------------
 ; Subroutine: read sector
 ;-------------------------------------------------------------------------------
 
-drv_readsector: sta buf1trk_1mhz
+.dr_readsector: sta buf1trk_1mhz
                 stx buf1sct_1mhz
-drv_readsector2:
+.dr_readsector2:
                 if LED_FLASHING>0
-                jsr drv_led
+                jsr .dr_led
                 endif
                 ldy #RETRIES            ;Retry counter
-drv_readsectorretry:
+.dr_readsectorretry:
                 lda #$80                ;Job code: read sector
-                jsr drv_readexec
+                jsr .dr_readexec
                 sei
                 cmp #$02                ;Errorcode
-                bcc drv_readsectorok
-                jsr drv_idchange
+                bcc .dr_readsectorok
+                jsr .dr_idchange
                 dey                     ;Decrement retry counter and try again
-                bne drv_readsectorretry
-drv_readsectorok:
+                bne .dr_readsectorretry
+.dr_readsectorok:
                 if LED_FLASHING>0
-drv_led:        lda #$08                ;Flash the drive LED
-drv_ledac1:     eor $1c00
-drv_ledac2:     sta $1c00
+.dr_led:        lda #$08                ;Flash the drive LED
+.dr_ledac1:     eor $1c00
+.dr_ledac2:     sta $1c00
                 endif
                 rts
 
-drv_readexec:   sta buf1cmd_1mhz        ;Buffer 1 job
+.dr_readexec:   sta buf1cmd_1mhz        ;Buffer 1 job
                 cli
-drv_readsectorpoll:
+.dr_readsectorpoll:
                 lda buf1cmd_1mhz
-                bmi drv_readsectorpoll
+                bmi .dr_readsectorpoll
                 rts
 
-drv_idchange:   ldx id_1mhz             ;Handle possible disk ID change
+.dr_idchange:   ldx id_1mhz             ;Handle possible disk ID change
                 stx iddrv0_1mhz
                 ldx id_1mhz+1
                 stx iddrv0_1mhz+1
@@ -773,17 +773,17 @@ drv_idchange:   ldx id_1mhz             ;Handle possible disk ID change
 ; IFFL filename
 ;-------------------------------------------------------------------------------
 
-drv_filename:   dc.b "IFFLDATA",0
+.dr_filename:   dc.b "IFFLDATA",0
 
 drivecodeend_drv_1mhz:
                 rend
 drivecodeend_c64_drv_1mhz:
 
-                subroutine drv_2mhz
-
 ;-------------------------------------------------------------------------------
 ; Drivecode for 2MHz drives
 ;-------------------------------------------------------------------------------
+
+                subroutine drv_2mhz
 
 drivecode_c64_drv_2mhz:
                 rorg drvstart
@@ -793,12 +793,12 @@ drivecode_drv_2mhz:
 ; Subroutine: scan the IFFL file
 ;-------------------------------------------------------------------------------
 
-drh_scan:       ldx buf2sct_2mhz        ;Make a copy of start sector
+.dr_scan:       ldx buf2sct_2mhz        ;Make a copy of start sector
                 stx drvtemp_2mhz
-drh_scansector: lda buf2trk_2mhz
+.dr_scansector: lda buf2trk_2mhz
                 ldx drvtemp_2mhz
-                jsr drh_readsector      ;Read sector to $0400
-                bcs drh_scandone        ;Return error
+                jsr .dr_readsector      ;Read sector to $0400
+                bcs .dr_scandone        ;Return error
                 ldx drvtemp_2mhz
                 lda drvbuf+1            ;Store T/S link to our linktable
                 sta drvsctlinktbl_2mhz,x ;so that we can "virtually" loop
@@ -806,15 +806,15 @@ drh_scansector: lda buf2trk_2mhz
                 lda drvbuf              ;through the sectors later
                 sta drvtrklinktbl_2mhz,x
                 cmp buf2trk_2mhz
-                beq drh_scansector      ;Loop until EOF or track step required
+                beq .dr_scansector      ;Loop until EOF or track step required
 
-drh_scanfile:   ldy drvtemp2_2mhz       ;Current file number
+.dr_scanfile:   ldy drvtemp2_2mhz       ;Current file number
                 lda drvcnth_2mhz        ;See if the byte counter is less than
-                bne drh_scannext        ;254, otherwise go to next sector
+                bne .dr_scannext        ;254, otherwise go to next sector
                 lda drvcntl_2mhz
                 cmp #254
-                bcs drh_scannext
-drh_scanfileok: sta drvoffstbl_2mhz,y   ;Store file offset
+                bcs .dr_scannext
+.dr_scanfileok: sta drvoffstbl_2mhz,y   ;Store file offset
                 adc drvlentbllo,y       ;Now add this file's length to the
                 sta drvcntl_2mhz        ;byte counter
                 lda drvcnth_2mhz
@@ -825,31 +825,31 @@ drh_scanfileok: sta drvoffstbl_2mhz,y   ;Store file offset
                 lda buf2sct_2mhz        ;it's no longer needed at this point)
                 sta drvscttbl,y
                 inc drvtemp2_2mhz       ;Increment file counter
-                bpl drh_scanfile        ;Fill up the table, then exit
+                bpl .dr_scanfile        ;Fill up the table, then exit
                 lda #$00
-                beq drh_scanok
+                beq .dr_scanok
 
-drh_scannext:   lda drvcntl_2mhz        ;Now subtract 254 bytes from the counter
+.dr_scannext:   lda drvcntl_2mhz        ;Now subtract 254 bytes from the counter
                 sec                     ;as we go to the next sector
                 sbc #254
                 sta drvcntl_2mhz
-                bcs drh_scannextok
+                bcs .dr_scannextok
                 dec drvcnth_2mhz
-drh_scannextok: ldx buf2sct_2mhz
+.dr_scannextok: ldx buf2sct_2mhz
                 lda drvsctlinktbl_2mhz,x ;Get next sector from our linktable
                 sta buf2sct_2mhz
                 lda drvtrklinktbl_2mhz,x ;Get next track from our linktable
                 cmp buf2trk_2mhz
-                beq drh_scanfile        ;If same track, go back to loop for
-drh_scanok:     sta buf2trk_2mhz        ;files
+                beq .dr_scanfile        ;If same track, go back to loop for
+.dr_scanok:     sta buf2trk_2mhz        ;files
                 clc                     ;Otherwise, have to return and execute
-drh_scandone:   rts                     ;again
+.dr_scandone:   rts                     ;again
 
 ;-------------------------------------------------------------------------------
 ; Drive main code
 ;-------------------------------------------------------------------------------
 
-drh_init:
+dr_init_2mhz:
                 if TWOBIT_PROTOCOL=0
                 lda #$08                ;Set CLK=low to tell C64 there's no data to
                 sta $4001               ;be read yet
@@ -857,47 +857,47 @@ drh_init:
 
                 lda #40                 ;Read first dir sector
                 ldx #3
-drh_dirsctloop: jsr drh_readsector
-                bcs drh_initfail
+.dr_dirsctloop: jsr .dr_readsector
+                bcs .dr_initfail
                 ldy #$02
-drh_fileloop:   lda drvbuf,y            ;File type must be PRG
+.dr_fileloop:   lda drvbuf,y            ;File type must be PRG
                 and #$83
                 cmp #$82
-                bne drh_nextfile
-                sty drh_namecmp+1
+                bne .dr_nextfile
+                sty .dr_namecmp+1
                 ldx #$03
                 lda #$a0                ;Make an endmark at the 16th letter
                 sta drvbuf+19,y
-drh_namecmp:    lda drvbuf,x
-                cmp drh_filename-3,x    ;Check against each letter of filename
-                bne drh_namedone        ;until at the endzero
+.dr_namecmp:    lda drvbuf,x
+                cmp .dr_filename-3,x    ;Check against each letter of filename
+                bne .dr_namedone        ;until at the endzero
                 inx
-                bne drh_namecmp
-drh_namedone:   cmp #$a0                ;If got to a $a0, name correct
-                beq drh_found
-drh_nextfile:   tya
+                bne .dr_namecmp
+.dr_namedone:   cmp #$a0                ;If got to a $a0, name correct
+                beq .dr_found
+.dr_nextfile:   tya
                 clc
                 adc #$20                ;Go to next file
                 tay
-                bcc drh_fileloop
-drh_nextdirsct: ldx drvbuf+1
+                bcc .dr_fileloop
+.dr_nextdirsct: ldx drvbuf+1
                 lda drvbuf              ;Any more dir sectors?
-                bne drh_dirsctloop      ;Errorcode $10 not used by 1541
+                bne .dr_dirsctloop      ;Errorcode $10 not used by 1541
                 lda #$10                ;so use it as "IFFL file not found"
-drh_initfail:   jsr drh_sendbyte        ;Send error code & exit
-drh_quit:       rts
+.dr_initfail:   jsr .dr_sendbyte        ;Send error code & exit
+.dr_quit:       rts
 
-drh_found:      lda drvbuf+1,y          ;IFFL datafile found, get its start
+.dr_found:      lda drvbuf+1,y          ;IFFL datafile found, get its start
                 ldx drvbuf+2,y          ;track & sector
-                jsr drh_readsector
-                bcs drh_initfail
+                jsr .dr_readsector
+                bcs .dr_initfail
                 ldy #MAXFILES-1
-drh_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
+.dr_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
                 sta drvlentbllo,y       ;Copy them to the length tables
                 lda drvbuf+2+MAXFILES,y
                 sta drvlentblhi,y
                 dey
-                bpl drh_copylentbl
+                bpl .dr_copylentbl
                 lda #$00                ;Clear the length of the last file
                 sta drvlentbllo+MAXFILES ;in case we have full 127 files
                 sta drvlentblhi+MAXFILES
@@ -908,28 +908,28 @@ drh_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
                 sta buf2trk_2mhz        ;data starts) and perform the scanning
                 lda drvbuf+1
                 sta buf2sct_2mhz
-drh_scanloop:   jsr drh_scan
-                bcs drh_initfail        ;If error, abort
+.dr_scanloop:   jsr .dr_scan
+                bcs .dr_initfail        ;If error, abort
                 lda buf2trk_2mhz        ;Keep calling the job until the file is
-                bne drh_scanloop        ;at an end
-                jsr drh_sendbyte        ;Now A=0, send the byte so that C64
+                bne .dr_scanloop        ;at an end
+                jsr .dr_sendbyte        ;Now A=0, send the byte so that C64
                                         ;knows the file was scanned successfully
 
-drh_mainloop:
+.dr_mainloop:
                 if TWOBIT_PROTOCOL=0
                 lda $4001               ;Set CLK=High
                 and #$f7
                 sta $4001
                 lda #$04
-drh_mainfilewait:
+.dr_mainfilewait:
                 bit $4001               ;Wait for CLK=High
-                bne drh_mainfilewait
+                bne .dr_mainfilewait
                 ldy #$00                ;Set DATA=High
                 sty $4001
                 endif
 
                 cli                     ;Allow interrupts so drive may stop
-                jsr drh_getbyte         ;Get file number from C64
+                jsr .dr_getbyte         ;Get file number from C64
                 tay                     ;(file number also now in drvtemp2_2mhz)
 
                 if TWOBIT_PROTOCOL=0
@@ -938,90 +938,90 @@ drh_mainfilewait:
                 endif
 
                 lda drvoffstbl_2mhz,y   ;Get file start offset
-                sta drh_mainsendstart+1
+                sta .dr_mainsendstart+1
                 lda drvtrktbl,y         ;Get file start track & sector
                 sta buf1trk_2mhz
                 lda drvscttbl,y
                 sta buf1sct_2mhz
 
-drh_mainsctloop:ldy drvtemp2_2mhz       ;Get the file number back
+.dr_mainsctloop:ldy drvtemp2_2mhz       ;Get the file number back
                 ldx #$fe                ;Assume we'll send a full sector (254b.)
                 lda buf1trk_2mhz        ;If we're on the startsector of the
                 cmp drvtrktbl+1,y       ;next file, we can only send up to the
-                bne drh_mainnotlast     ;next file's startoffset
+                bne .dr_mainnotlast     ;next file's startoffset
                 lda buf1sct_2mhz
                 cmp drvscttbl+1,y
-                bne drh_mainnotlast
+                bne .dr_mainnotlast
                 ldx drvoffstbl_2mhz+1,y ;If endoffset = startoffset, we're
-                cpx drh_mainsendstart+1 ;already on the next file and can't
-                beq drh_mainfiledone    ;send anything
-drh_mainnotlast:stx drh_mainsendend+1
-                jsr drh_readsector2     ;Read sector, abort if failed
-                bcs drh_mainfilefail
+                cpx .dr_mainsendstart+1 ;already on the next file and can't
+                beq .dr_mainfiledone    ;send anything
+.dr_mainnotlast:stx .dr_mainsendend+1
+                jsr .dr_readsector2     ;Read sector, abort if failed
+                bcs .dr_mainfilefail
 
                 if RECEIVE_BUFFER=0
-                lda drh_mainsendend+1
+                lda .dr_mainsendend+1
                 cmp #$fe
                 php
                 sec
-                sbc drh_mainsendstart+1 ;Get amount of bytes to send
-                jsr drh_sendbyte
-drh_mainsendstart:
+                sbc .dr_mainsendstart+1 ;Get amount of bytes to send
+                jsr .dr_sendbyte
+.dr_mainsendstart:
                 ldy #$00
-drh_mainsendloop:
+.dr_mainsendloop:
                 iny
                 lda drvbuf+1,y          ;Send buffer
-                jsr drh_sendbyte
-drh_mainsendend:
+                jsr .dr_sendbyte
+.dr_mainsendend:
                 cpy #$00
-                bne drh_mainsendloop
+                bne .dr_mainsendloop
                 plp                     ;See if it was a partial sector
-                bne drh_mainfiledone    ;(last one)
+                bne .dr_mainfiledone    ;(last one)
 
                 else
 
-drh_mainsendend:ldy #$00
+.dr_mainsendend:ldy #$00
                 cpy #$fe
                 php
                 tya
                 sec
-                sbc drh_mainsendstart+1 ;Get amount of bytes to send
-                jsr drh_sendbyte
-drh_mainsendloop:
+                sbc .dr_mainsendstart+1 ;Get amount of bytes to send
+                jsr .dr_sendbyte
+.dr_mainsendloop:
                 lda drvbuf+1,y          ;Send buffer backwards
-                jsr drh_sendbyte
+                jsr .dr_sendbyte
                 dey
-drh_mainsendstart:
+.dr_mainsendstart:
                 cpy #$00
-                bne drh_mainsendloop
+                bne .dr_mainsendloop
                 plp                     ;See if it was a partial sector
-                bne drh_mainfiledone    ;(last one)
+                bne .dr_mainfiledone    ;(last one)
                 endif
 
-drh_mainnextsct:lda #$00
-                sta drh_mainsendstart+1 ;Startoffset for next sector is 0
+.dr_mainnextsct:lda #$00
+                sta .dr_mainsendstart+1 ;Startoffset for next sector is 0
                 lda drvbuf+1            ;Follow the T/S link
                 sta buf1sct_2mhz
                 lda drvbuf
                 sta buf1trk_2mhz        ;Go back to send the next sector,
-                bne drh_mainsctloop     ;unless IFFL file end encountered
-drh_mainfiledone:
+                bne .dr_mainsctloop     ;unless IFFL file end encountered
+.dr_mainfiledone:
                 lda #$00                ;Errorcode 0: all OK
-drh_mainfilefail:
+.dr_mainfilefail:
                 pha                     ;File end: send $00 and errorcode
                 lda #$00
-                jsr drh_sendbyte
+                jsr .dr_sendbyte
                 pla
-                jsr drh_sendbyte
+                jsr .dr_sendbyte
 
-                jmp drh_mainloop        ;Then go back to main to wait for
+                jmp .dr_mainloop        ;Then go back to main to wait for
                                         ;file number
 
 ;-------------------------------------------------------------------------------
 ; Subroutine: send byte in A to C64; with 2-bit protocol no IRQs are allowed.
 ;-------------------------------------------------------------------------------
 
-drh_sendbyte:
+.dr_sendbyte:
                 if TWOBIT_PROTOCOL>0
                 sta drvtemp_2mhz
                 lsr
@@ -1030,21 +1030,21 @@ drh_sendbyte:
                 lsr
                 tax
                 lda #$04
-drh_sendwait:   bit $4001               ;Wait for CLK==low
-                beq drh_sendwait
+.dr_sendwait:   bit $4001               ;Wait for CLK==low
+                beq .dr_sendwait
                 lsr                     ;Set DATA=low
                 sta $4001
-                lda drh_sendtbl,x       ;Get the CLK,DATA pairs for low nybble
+                lda .dr_sendtbl,x       ;Get the CLK,DATA pairs for low nybble
                 pha
                 lda drvtemp_2mhz
                 and #$0f
                 tax
                 lda #$04
-drh_sendwait2:  bit $4001               ;Wait for CLK==high (start of high speed transfer)
-                bne drh_sendwait2
-                lda drh_sendtbl,x       ;Get the CLK,DATA pairs for high nybble
+.dr_sendwait2:  bit $4001               ;Wait for CLK==high (start of high speed transfer)
+                bne .dr_sendwait2
+                lda .dr_sendtbl,x       ;Get the CLK,DATA pairs for high nybble
                 sta $4001
-                jsr drh_delay18
+                jsr .dr_delay18
                 nop
                 asl
                 and #$0f
@@ -1060,7 +1060,7 @@ drh_sendwait2:  bit $4001               ;Wait for CLK==high (start of high speed
                 sta $4001
                 ldx #$00
                 nop
-                jsr drh_delay12
+                jsr .dr_delay12
                 stx $4001               ;Finish send: DATA & CLK both high
 
                 else
@@ -1103,10 +1103,10 @@ drh_sendwait2:  bit $4001               ;Wait for CLK==high (start of high speed
 ;-------------------------------------------------------------------------------
 
                 if TWOBIT_PROTOCOL>0
-drh_delay18:    cmp ($00,x)
-drh_delay12:    rts
+.dr_delay18:    cmp ($00,x)
+.dr_delay12:    rts
 
-drh_sendtbl:    dc.b $0f,$07,$0d,$05
+.dr_sendtbl:    dc.b $0f,$07,$0d,$05
                 dc.b $0b,$03,$09,$01
                 dc.b $0e,$06,$0c,$04
                 dc.b $0a,$02,$08,$00
@@ -1116,65 +1116,65 @@ drh_sendtbl:    dc.b $0f,$07,$0d,$05
 ; Subroutine: get byte from C64 in A
 ;-------------------------------------------------------------------------------
 
-drh_getbyte:    ldy #$08                ;Counter: receive 8 bits
-drh_recvbit:    lda #$85
+.dr_getbyte:    ldy #$08                ;Counter: receive 8 bits
+.dr_recvbit:    lda #$85
                 and $4001               ;Wait for CLK==low || DATA==low
-                bmi drh_gotatn          ;Quit if ATN was asserted
-                beq drh_recvbit
+                bmi .dr_gotatn          ;Quit if ATN was asserted
+                beq .dr_recvbit
                 lsr                     ;Read the data bit
                 lda #2                  ;Prepare for CLK=high, DATA=low
-                bcc drh_rskip
+                bcc .dr_rskip
                 lda #8                  ;Prepare for CLK=low, DATA=high
-drh_rskip:      sta $4001               ;Acknowledge the bit received
+.dr_rskip:      sta $4001               ;Acknowledge the bit received
                 ror drvtemp2_2mhz       ;and store it
-drh_rwait:      lda $4001               ;Wait for CLK==high || DATA==high
+.dr_rwait:      lda $4001               ;Wait for CLK==high || DATA==high
                 and #5
                 eor #5
-                beq drh_rwait
+                beq .dr_rwait
                 lda #0
                 sta $4001               ;Set CLK=DATA=high
                 dey
-                bne drh_recvbit         ;Loop until all bits have been received
+                bne .dr_recvbit         ;Loop until all bits have been received
                 lda drvtemp2_2mhz       ;Return the data to A
                 rts
-drh_gotatn:     pla                     ;If ATN gets asserted, exit to the operating
+.dr_gotatn:     pla                     ;If ATN gets asserted, exit to the operating
                 pla                     ;system. Discard the return address and
-                jmp drh_quit            ;return
+                jmp .dr_quit            ;return
 
 ;-------------------------------------------------------------------------------
 ; Subroutine: read sector
 ;-------------------------------------------------------------------------------
 
-drh_readsector: sta buf1trk_2mhz
+.dr_readsector: sta buf1trk_2mhz
                 stx buf1sct_2mhz
-drh_readsector2:
+.dr_readsector2:
                 if LED_FLASHING>0
-                jsr drh_led
+                jsr .dr_led
                 endif
                 ldy #RETRIES            ;Retry counter
-drh_readsectorretry:
+.dr_readsectorretry:
                 lda #$80                ;Job code: read sector
-                jsr drh_readexec
+                jsr .dr_readexec
                 sei
                 cmp #$02                ;Errorcode
-                bcc drh_readsectorok
-                ;jsr drh_idchange
+                bcc .dr_readsectorok
+                ;jsr .dr_idchange
                 dey                     ;Decrement retry counter and try again
-                bne drh_readsectorretry
-drh_readsectorok:
+                bne .dr_readsectorretry
+.dr_readsectorok:
                 if LED_FLASHING>0
-drh_led:        lda #$40                ;Flash the drive LED
-drh_ledac1:     eor $4000
-drh_ledac2:     sta $4000
+.dr_led:        lda #$40                ;Flash the drive LED
+.dr_ledac1:     eor $4000
+.dr_ledac2:     sta $4000
                 endif
                 rts
 
-drh_readexec:   ldx #1                  ;Buffer 1 job
+.dr_readexec:   ldx #1                  ;Buffer 1 job
                 clc
                 ;cli                     ;Already executed ($959e)
                 jmp $ff54               ;Returns with A = job status ($95a3)
 
-drh_idchange:   ;ldx id_2mhz            ;Handle possible disk ID change
+.dr_idchange:   ;ldx id_2mhz            ;Handle possible disk ID change
                 ;stx iddrv0_2mhz
                 ;ldx id_2mhz+1
                 ;stx iddrv0_2mhz+1
@@ -1184,7 +1184,7 @@ drh_idchange:   ;ldx id_2mhz            ;Handle possible disk ID change
 ; IFFL filename
 ;-------------------------------------------------------------------------------
 
-drh_filename:   dc.b "IFFLDATA",0
+.dr_filename:   dc.b "IFFLDATA",0
 
 drivecodeend_drv_2mhz:
                 rend
