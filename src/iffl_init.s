@@ -28,6 +28,9 @@ ciout           = $ffa8                 ;Kernal routines
 listen          = $ffb1
 second          = $ff93
 unlsn           = $ffae
+talk            = $ffb4
+tksa            = $ff96
+untlk           = $ffab
 acptr           = $ffa5
 chkin           = $ffc6
 chkout          = $ffc9
@@ -107,6 +110,48 @@ initloader1:    lda #<il_nmi            ;Set NMI vector (let NMI trigger once
                 lda #%00011001          ;Run Timer A in one-shot mode
                 sta $dd0e
 
+il_detectdrive: lda #$aa
+                sta $a5
+                lda #<il_drivecode
+                ldx #>il_drivecode
+                ldy #(il_driveend-il_drivecode+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
+                jsr il_begin             ;Upload test-drivecode
+                ;lda status              ;If serial error here, not a
+                ;cmp #$c0                ;serial device
+                ;beq il_noserial
+                ldx #$00
+                ldy #$00
+il_delay:       inx                     ;Delay to make sure the test-
+                bne il_delay            ;drivecode executed to the end
+                iny
+                bpl il_delay
+                lda fa                  ;Set drive to listen
+                jsr listen
+                lda #$6f
+                jsr second
+                ldx #$05
+il_ddsendmr:    lda il_mrstring,x       ;Send M-R command (backwards)
+                jsr ciout
+                dex
+                bpl il_ddsendmr
+                jsr unlsn
+                lda fa
+                jsr talk
+                lda #$6f
+                jsr tksa
+                lda #$00
+                jsr acptr               ;First byte: test value
+                pha
+                jsr acptr               ;Second byte: drive type
+                tax
+                jsr untlk
+                pla
+
+		lda #<drv_init
+		ldx #>drv_init
+		sta il_mestring+1
+		stx il_mestring
+
                 lda #<drivecode_c64
                 ldx #>drivecode_c64
                 ldy #(drivecodeend_drv-drivecode_drv+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
@@ -116,7 +161,7 @@ il_begin:       sta il_senddata+1
                 lda #>drvstart
                 sta il_mwstring+1
                 ldy #$00
-;                sty il_mwstring+2       ;Drivecode starts at lowbyte 0
+                sty il_mwstring+2       ;Drivecode starts at lowbyte 0
                 beq il_nextpacket
 il_sendmw:      lda il_mwstring,x       ;Send M-W command (backwards)
                 jsr ciout
@@ -194,7 +239,55 @@ il_nmi:         rti
 
 il_mwstring:    dc.b MW_DATA_LENGTH,$00,$00,"W-M"
 
-il_mestring:    dc.b >drv_init, <drv_init, "E-M"
+il_mestring:    dc.b >drvstart, <drvstart, "E-M"
+
+;-------------------------------------------------------------------------------
+; IL_DRIVECODE - Drivecode used to detect drive type & test if drivecode
+; execution works OK
+;-------------------------------------------------------------------------------
+
+il_drivecode:
+                rorg drvstart
+
+                asl ild_return1         ;Modify first returnvalue to prove
+                                        ;we've executed something :)
+                lda $fea0               ;Recognize drive family
+                ldx #3                  ;(from Dreamload)
+ild_floop:      cmp ild_family-1,x
+                beq ild_ffound
+                dex                     ;If unrecognized, assume 1541
+                bne ild_floop
+                beq ild_idfound
+ild_ffound:     lda ild_idloclo-1,x
+                sta ild_idlda+1
+                lda ild_idlochi-1,x
+                sta ild_idlda+2
+ild_idlda:      lda $fea4               ;Recognize drive type
+                ldx #3                  ;3 = CMD HD
+ild_idloop:     cmp ild_id-1,x          ;2 = CMD FD
+                beq ild_idfound         ;1 = 1581
+                dex                     ;0 = 1541
+                bne ild_idloop
+ild_idfound:    stx ild_return2
+                rts
+
+ild_family:     dc.b $43,$0d,$ff
+ild_idloclo:    dc.b $a4,$c6,$e9
+ild_idlochi:    dc.b $fe,$e5,$a6
+ild_id:         dc.b "8","F","H"
+
+ild_return1:    dc.b $55
+ild_return2:    dc.b 0
+
+                rend
+
+il_driveend:
+
+;-------------------------------------------------------------------------------
+; M-R command string
+;-------------------------------------------------------------------------------
+
+il_mrstring:    dc.b 2,>ild_return1,<ild_return1,"R-M"
 
 ;-------------------------------------------------------------------------------
 ; Drivecode
