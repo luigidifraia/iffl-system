@@ -490,7 +490,7 @@ drv_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
                 sta drvlentblhi+MAXFILES
                 sta drvtemp2_1mhz       ;Clear the scanning file counter
                 sta drvcntl_1mhz        ;Clear the 16bit IFFL byte counter
-;                sta drvcnth_1mhz        ;TODO: Already 0 after a reset
+                sta drvcnth_1mhz
                 lda drvbuf              ;Now get the next T/S (where actual
                 sta buf2trk_1mhz        ;data starts) and perform the scanning
                 lda drvbuf+1
@@ -906,7 +906,7 @@ drh_copylentbl: lda drvbuf+2,y          ;First sector contains the file lengths.
                 sta drvlentblhi+MAXFILES
                 sta drvtemp2_2mhz       ;Clear the scanning file counter
                 sta drvcntl_2mhz        ;Clear the 16bit IFFL byte counter
-;                sta drvcnth_2mhz        ;TODO: Already 0 after a reset
+                sta drvcnth_2mhz
                 lda drvbuf              ;Now get the next T/S (where actual
                 sta buf2trk_2mhz        ;data starts) and perform the scanning
                 lda drvbuf+1
@@ -1157,17 +1157,11 @@ drh_readsector2:
                 ldy #RETRIES            ;Retry counter
 drh_readsectorretry:
                 lda #$80                ;Job code: read sector
-                ldx #1                  ;Buffer 1 job
-                clc
-                ;cli                     ;Already executed ($959e)
-                jsr $ff54               ;Returns with A = job status ($95a3)
+                jsr drh_readexec
                 sei
                 cmp #$02                ;Errorcode
                 bcc drh_readsectorok
-                ;ldx id_2mhz            ;Handle possible disk ID change
-                ;stx iddrv0_2mhz
-                ;ldx id_2mhz+1
-                ;stx iddrv0_2mhz+1
+                ;jsr drh_idchange
                 dey                     ;Decrement retry counter and try again
                 bne drh_readsectorretry
 drh_readsectorok:
@@ -1176,6 +1170,17 @@ drh_led:        lda #$40                ;Flash the drive LED
 drh_ledac1:     eor $4000
 drh_ledac2:     sta $4000
                 endif
+                rts
+
+drh_readexec:   ldx #1                  ;Buffer 1 job
+                clc
+                ;cli                     ;Already executed ($959e)
+                jmp $ff54               ;Returns with A = job status ($95a3)
+
+drh_idchange:   ;ldx id_2mhz            ;Handle possible disk ID change
+                ;stx iddrv0_2mhz
+                ;ldx id_2mhz+1
+                ;stx iddrv0_2mhz+1
                 rts
 
 ;-------------------------------------------------------------------------------
