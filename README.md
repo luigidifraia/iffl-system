@@ -14,11 +14,11 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - The `addiffl` tool does not overwrite existing records whose length's LSB happens to be 0.
 
 ## Extensions
-- Added 1-bit transfer support for using sprites while loading (`TWOBIT_PROTOCOL = 0` as per Covert Bitops' [Loadersystem](https://cadaver.github.io/tools.html)).
-- Added support for loading under the I/O area and Kernal ROM (`LOAD_UNDER_IO = 1` as per Covert Bitops' [Loadersystem](https://cadaver.github.io/tools.html)).
+- Integrated Lasses' 1-bit transfer protocol, for using sprites while loading (`TWOBIT_PROTOCOL = 0` as per Covert Bitops' [Loadersystem](https://cadaver.github.io/tools.html)).
+- Integrated support for loading under the I/O area and Kernal ROM (`LOAD_UNDER_IO = 1` as per Covert Bitops' [Loadersystem](https://cadaver.github.io/tools.html)).
 - Added optional buffer-less block receive support (`RECEIVE_BUFFER = 0` saves 254 bytes on the C=64, with some speed trade-off).
 - Added support for ByteBoozer 2.0 (which does **not** require a depack buffer on the C=64), Pucrunch and Exomizer files. Furthermore, linked files are all loaded with a single loader call.
-- Added support for Commodore 1581 drives.
+- Integrated Lasse's drive detection (Dreamload) and added support for Commodore 1581 drives with Lasse's help and advice.
 
 ## To do
 - Mark sections of the code that are critical to keep in the same page in RAM.
