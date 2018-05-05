@@ -299,6 +299,8 @@ usefastload:    dc.b 0                          ;If nonzero, fastloading will
                                                 ;be used (autoconfigured)
 
 ;-------------------------------------------------------------------------------
+; Drive type-specific defines
+;-------------------------------------------------------------------------------
 
                 subroutine drv_1mhz
 
@@ -765,6 +767,8 @@ drivecodeend_drv_1mhz:
                 rend
 drivecodeend_c64_drv_1mhz:
 
+;-------------------------------------------------------------------------------
+; Drive type-specific defines
 ;-------------------------------------------------------------------------------
 
                 subroutine drv_2mhz
