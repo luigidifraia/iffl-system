@@ -5,5 +5,5 @@ Examples in this folder all implement the same scenario: load a tune, a multicol
 
 ## Notes
 - The two-bit protocol is used in all examples.
-- Picture data is structured into bitmap data, padding, video RAM data, padding, color RAM data. This is so that the former two end up in their final RAM locations already.
+- Picture data is structured into bitmap data, padding, video RAM data, padding, color RAM data. This is so that a single file is used for all data, which simplifies the set of files to work with.
 - As the unpacked file loader does not support linked files, there isn't a "linked" variant of the unpacked data example.
