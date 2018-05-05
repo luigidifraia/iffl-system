@@ -121,7 +121,7 @@ il_ddsendmr:    lda il_mrstring,x       ;Send M-R command (backwards)
                 pla
                 cmp #$aa                ;Drive can execute code, so can
                 beq il_fastloadok       ;use fastloader
-il_fastloadko:  rts
+il_unsupported: rts
 
 il_fastloadok:  cpx #$01
                 bcs il_drv2mhz
@@ -134,10 +134,10 @@ il_fastloadok:  cpx #$01
                 lda #<drivecode_c64_drv_1mhz
                 ldx #>drivecode_c64_drv_1mhz
                 ldy #(drivecodeend_drv_1mhz-drivecode_drv_1mhz+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
-                bne il_begin
+                bne il_supported
 
 il_drv2mhz:     cpx #$02
-                bcs il_fastloadko
+                bcs il_unsupported
 
                 lda #<dr_init_2mhz
                 sta il_mestring+1
@@ -148,9 +148,9 @@ il_drv2mhz:     cpx #$02
                 ldx #>drivecode_c64_drv_2mhz
                 ldy #(drivecodeend_drv_2mhz-drivecode_drv_2mhz+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
 
-il_begin:       inc usefastload
+il_supported:   inc usefastload
 
-                sta il_senddata+1
+il_begin:       sta il_senddata+1
                 stx il_senddata+2
                 sty loadtempreg         ;Number of "packets" to send
                 lda #>drvstart
