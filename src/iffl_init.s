@@ -53,7 +53,7 @@ drvlentblhi     = drvlentbllo+MAXFILES+1 ;File length hibytes
 drvbuf          = $0400                 ;Sector data buffer
 drvstart        = $0500                 ;Start of drivecode
 
-drvtrktbl       = $0300                 ;Start track of files (overwrites lentbl)
+drvtrktbl       = drvlentbllo           ;Start track of files (overwrites lentbl)
 drvscttbl       = drvtrktbl+MAXFILES+1  ;Start sector of files (overwrites lentbl)
 
 ;-------------------------------------------------------------------------------
