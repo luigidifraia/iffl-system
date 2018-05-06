@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
         for (filepos = 0; filepos < 127; filepos++)
         {
-                if (!lentbl[filepos] && !!lentbl[filepos+127]) break;
+                if (!lentbl[filepos] && !lentbl[filepos+127]) break;
         }
         if (filepos >= 127)
         {
