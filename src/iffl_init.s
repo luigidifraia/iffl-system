@@ -602,7 +602,7 @@ dr_init_1mhz:
                 rts
 
 ;-------------------------------------------------------------------------------
-; Subroutine: send byte in A to C64; with 2-bit protocol no IRQs are allowed.
+; Subroutine: send byte in A to C64; no IRQs are allowed.
 ;-------------------------------------------------------------------------------
 
 .dr_sendbyte:
@@ -1030,7 +1030,7 @@ dr_init_2mhz:
                                         ;file number
 
 ;-------------------------------------------------------------------------------
-; Subroutine: send byte in A to C64; with 2-bit protocol no IRQs are allowed.
+; Subroutine: send byte in A to C64; no IRQs are allowed.
 ;-------------------------------------------------------------------------------
 
 .dr_sendbyte:
