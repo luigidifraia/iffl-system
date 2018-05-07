@@ -1,5 +1,10 @@
 # IFFL System Examples with Slideshow
-Examples in this folder all implement the same scenario: load a tune, start playback, load a multicolor bitmap picture, wait for spacebar to be pressed, and load another picture.
+Examples in this folder all implement the same scenario:
+- load a tune, 
+- start tune playback, 
+- load a multicolor bitmap picture, 
+- wait for spacebar to be pressed, and 
+- load another picture.
 
 ## Notes
 - The two-bit protocol is used in all examples.
