@@ -4,10 +4,11 @@ Lasse Öörni's Integrated File Flexible Loader for Commodore 1541/1541-II/157x/
 Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rants/iffl.html).
 
 ## Notes
-- To use the provided `Makefile` you need a recent version of `make`. If you don't know where to get one, try [this one](http://gnuwin32.sourceforge.net/packages/make.htm).
-- Assemble with `dasm`: v2.12.04 from Covert Bitops' [Tools page](https://cadaver.github.io/tools.html) has been tested.
+- Assemble source files with `dasm`. Version 2.12.04 from Covert Bitops' [Tools page](https://cadaver.github.io/tools.html) has been successfully tested.
 - The `makedisk` tool is available from Covert Bitops' [Tools page](https://cadaver.github.io/tools.html).
-- Use the extended version of the ByteBoozer2 cruncher from [here](https://github.com/luigidifraia/ByteBoozer2).
+- The `c1541` tool is available from VICE's [Web page](http://vice-emu.sourceforge.net/index.html#download).
+- If you plan to use ByteBoozer2 crunching, get the extended version of the cruncher from [here](https://github.com/luigidifraia/ByteBoozer2).
+- To use the provided `Makefile` you need a recent version of `make`. If you don't know where to get one you're probably using Windows, so try [this one](http://gnuwin32.sourceforge.net/packages/make.htm).
 - Under Windows you might want to run `win32/ifflvar.bat` to setup your build environment, then either run `make` or any of the provided batch files.
 
 ## Fixes
