@@ -26,4 +26,4 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - Add support for CMD FD4000, and SD2IEC.
 
 ## Acknowledgments
-It wouldn't be possible for me to contribute this project without Lasse's initial publication of his IFFL System and Loadersystem, and without frequent email exchanges with him and Flavio.
+It wouldn't be possible for me to contribute this project without Lasse's initial publication of his IFFL System and Loadersystem, and without a number of email exchanges I had with him and Flavio.
