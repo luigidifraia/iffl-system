@@ -21,9 +21,9 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - Added support for ByteBoozer 2.0 (which does **not** require a depack buffer on the C=64), Pucrunch and Exomizer files. Furthermore, linked packed files are all loaded with a single loader call.
 - Integrated Lasse's drive detection (Dreamload) and added support for Commodore 1581 and CMD FD2000 drives with Lasse's help and advice.
 
-## Acknowledgments
-It wouldn't be possible for me to contribute this project without Lasse's initial publication of his IFFL System and Loadersystem, and without frequent email exchanges with him and Flavio.
-
 ## To do
 - Mark sections of the code that are critical to keep in the same page in RAM.
 - Add support for CMD FD4000, and SD2IEC.
+
+## Acknowledgments
+It wouldn't be possible for me to contribute this project without Lasse's initial publication of his IFFL System and Loadersystem, and without frequent email exchanges with him and Flavio.
