@@ -107,7 +107,7 @@ _done           rts
 
 ; Init VIC II registers and sprite image pointers
 
-vsetup:         lda #$00
+spritesetup:    lda #$00
                 sta $d000
                 sta $d001
                 sta $d027
