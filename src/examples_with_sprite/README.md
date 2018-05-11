@@ -5,3 +5,6 @@ The examples in this folder implement a familiar scenario:
 
 ## Notes
 - The one-bit protocol is used in these examples, in order to allow a sprite on screen.
+
+## Known issues
+- Attempting to load a non-existing file can occasionally result in a deadlock for the examples presented here. Such an attempt is explicitly made in order to keep track of this issue.
