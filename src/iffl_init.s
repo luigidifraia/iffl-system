@@ -56,6 +56,8 @@ drvstart        = $0500                 ;Start of drivecode
 drvtrktbl       = drvlentbllo           ;Start track of files (overwrites lentbl)
 drvscttbl       = drvtrktbl+MAXFILES+1  ;Start sector of files (overwrites lentbl)
 
+drvoffstbl      = $0780                 ;Start offset of files
+
 ;-------------------------------------------------------------------------------
 ; INITLOADER
 ;
@@ -136,7 +138,7 @@ il_fastloadok:  cpx #$01
                 ldy #(drivecodeend_drv_1mhz-drivecode_drv_1mhz+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
                 bne il_supported
 
-il_drv2mhz:     cpx #$02
+il_drv2mhz:     cpx #$03
                 bcs il_unsupported
 
                 lda #<dr_init_2mhz
@@ -144,7 +146,19 @@ il_drv2mhz:     cpx #$02
                 lda #>dr_init_2mhz
                 sta il_mestring
 
-                lda #<drivecode_c64_drv_2mhz
+                cpx #$02
+                bcc il_drv1581
+
+                ldx #$a5                ;Patch dir start track/sector for FD2000
+                stx drv_dirtrk-drvstart+drivecode_c64_drv_2mhz
+                inx
+                stx drv_dirsct-drvstart+drivecode_c64_drv_2mhz
+                lda #$54
+                sta drv_dirtrk+1-drvstart+drivecode_c64_drv_2mhz
+                lda #$56
+                sta drv_dirsct+1-drvstart+drivecode_c64_drv_2mhz
+
+il_drv1581:     lda #<drivecode_c64_drv_2mhz
                 ldx #>drivecode_c64_drv_2mhz
                 ldy #(drivecodeend_drv_2mhz-drivecode_drv_2mhz+MW_DATA_LENGTH-1)/MW_DATA_LENGTH
 
@@ -309,8 +323,6 @@ usefastload:    dc.b 0                          ;If nonzero, fastloading will
 .drvtrklinktbl  = $0420                 ;Track link table for fast scanning
 .drvsctlinktbl  = $0440                 ;Sector link table for fast scanning
 
-.drvoffstbl     = $0780                 ;Start offset of files
-
 .buf1cmd        = $01                   ;Buffer 1 command
 .buf1trk        = $08                   ;Buffer 1 track
 .buf1sct        = $09                   ;Buffer 1 sector
@@ -379,7 +391,7 @@ drivecode_drv_1mhz:
                 lda .drvcntl
                 cmp #254
                 bcs .dr_scannext
-.dr_scanfileok: sta .drvoffstbl,y       ;Store file offset
+.dr_scanfileok: sta drvoffstbl,y        ;Store file offset
                 adc drvlentbllo,y       ;Now add this file's length to the
                 sta .drvcntl            ;byte counter
                 lda .drvcnth
@@ -512,7 +524,7 @@ dr_init_1mhz:
                 sta .busport            ;be read yet
                 endif
 
-                lda .drvoffstbl,y       ;Get file start offset
+                lda drvoffstbl,y        ;Get file start offset
                 sta .dr_mainsendstart+1
                 lda drvtrktbl,y         ;Get file start track & sector
                 sta .buf1trk
@@ -527,7 +539,7 @@ dr_init_1mhz:
                 lda .buf1sct
                 cmp drvscttbl+1,y
                 bne .dr_mainnotlast
-                ldx .drvoffstbl+1,y     ;If endoffset = startoffset, we're
+                ldx drvoffstbl+1,y      ;If endoffset = startoffset, we're
                 cpx .dr_mainsendstart+1 ;already on the next file and can't
                 beq .dr_mainfiledone    ;send anything
 .dr_mainnotlast:stx .dr_mainsendend+1
@@ -728,10 +740,7 @@ dr_init_1mhz:
                 endif
                 ldy #RETRIES            ;Retry counter
 .dr_readsectorretry:
-                lda #$80                ;Job code: read sector
                 jsr .dr_readexec
-                sei
-                cmp #$02                ;Errorcode
                 bcc .dr_readsectorok
                 jsr .dr_idchange
                 dey                     ;Decrement retry counter and try again
@@ -744,11 +753,14 @@ dr_init_1mhz:
                 endif
                 rts
 
-.dr_readexec:   sta .buf1cmd            ;Buffer 1 job
+.dr_readexec:   lda #$80                ;Job code: read sector
+                sta .buf1cmd            ;Buffer 1 job
                 cli
 .dr_readsectorpoll:
                 lda .buf1cmd
                 bmi .dr_readsectorpoll
+                sei
+                cmp #$02                ;Errorcode
                 rts
 
 .dr_idchange:   ldx .id                 ;Handle possible disk ID change
@@ -776,20 +788,17 @@ drivecodeend_c64_drv_1mhz:
         ;1581/FD/HD defines
 
 .drvtrklinktbl  = $0800                 ;Track link table for fast scanning
-.drvsctlinktbl  = $0840                 ;Sector link table for fast scanning
+.drvsctlinktbl  = $0900                 ;Sector link table for fast scanning
 
-.drvoffstbl     = $0880                 ;Start offset of files
-
+.buf1cmd        = $03                   ;Buffer 1 command
 .buf1trk        = $0d                   ;Buffer 1 track
 .buf1sct        = $0e                   ;Buffer 1 sector
 .buf2trk        = $0f                   ;Buffer 2 track
 .buf2sct        = $10                   ;Buffer 2 sector
-.drvtemp        = $00                   ;Temp variable
-.drvtemp2       = $01                   ;Temp variable, IFFL file number
-.drvcntl        = $5e                   ;IFFL byte counter for scanning
-.drvcnth        = $5f
-;.iddrv0         = $??                   ;Disk drive ID
-;.id             = $1d                   ;Disk ID
+.drvtemp        = $70                   ;Temp variable
+.drvtemp2       = $71                   ;Temp variable, IFFL file number
+.drvcntl        = $72                   ;IFFL byte counter for scanning
+.drvcnth        = $73
 
 .busport        = $4001
 
@@ -826,7 +835,7 @@ drivecode_drv_2mhz:
                 lda .drvcntl
                 cmp #254
                 bcs .dr_scannext
-.dr_scanfileok: sta .drvoffstbl,y       ;Store file offset
+.dr_scanfileok: sta drvoffstbl,y        ;Store file offset
                 adc drvlentbllo,y       ;Now add this file's length to the
                 sta .drvcntl            ;byte counter
                 lda .drvcnth
@@ -867,8 +876,8 @@ dr_init_2mhz:
                 sta .busport            ;be read yet
                 endif
 
-                lda #40                 ;Read first dir sector
-                ldx #3
+drv_dirtrk:     lda #40                 ;Read first dir sector
+drv_dirsct:     ldx #3
 .dr_dirsctloop: jsr .dr_readsector
                 bcs .dr_initfail
                 ldy #$02
@@ -949,7 +958,7 @@ dr_init_2mhz:
                 sta .busport            ;be read yet
                 endif
 
-                lda .drvoffstbl,y       ;Get file start offset
+                lda drvoffstbl,y        ;Get file start offset
                 sta .dr_mainsendstart+1
                 lda drvtrktbl,y         ;Get file start track & sector
                 sta .buf1trk
@@ -964,7 +973,7 @@ dr_init_2mhz:
                 lda .buf1sct
                 cmp drvscttbl+1,y
                 bne .dr_mainnotlast
-                ldx .drvoffstbl+1,y     ;If endoffset = startoffset, we're
+                ldx drvoffstbl+1,y      ;If endoffset = startoffset, we're
                 cpx .dr_mainsendstart+1 ;already on the next file and can't
                 beq .dr_mainfiledone    ;send anything
 .dr_mainnotlast:stx .dr_mainsendend+1
@@ -1165,10 +1174,7 @@ dr_init_2mhz:
                 endif
                 ldy #RETRIES            ;Retry counter
 .dr_readsectorretry:
-                lda #$80                ;Job code: read sector
                 jsr .dr_readexec
-                sei
-                cmp #$02                ;Errorcode
                 bcc .dr_readsectorok
                 ;jsr .dr_idchange
                 dey                     ;Decrement retry counter and try again
@@ -1181,16 +1187,17 @@ dr_init_2mhz:
                 endif
                 rts
 
-.dr_readexec:   ldx #1                  ;Buffer 1 job
+.dr_readexec:   lda #$80                ;Job code: read sector
+                ldx #1                  ;Buffer 1 job
                 clc
-                ;cli                     ;Already executed ($959e)
-                jmp $ff54               ;Returns with A = job status ($95a3)
-
-.dr_idchange:   ;ldx .id                ;Handle possible disk ID change
-                ;stx .iddrv0
-                ;ldx .id+1
-                ;stx .iddrv0+1
+                ;cli                     ;Already executed (at $959e on a 1581)
+                jsr $ff54               ;Returns with A = job status on a 1581 ($95a3)
+                lda .buf1cmd            ;Only strictly necessary for FD2000
+                sei
+                cmp #$02                ;Errorcode
                 rts
+
+.dr_idchange:   ;rts
 
 ;-------------------------------------------------------------------------------
 ; IFFL filename
