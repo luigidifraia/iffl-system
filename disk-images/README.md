@@ -1,7 +1,7 @@
 # Disk images
 
 ## CMD FD2000 disk images
-In order to use the provided disk images for CMD FD2000 floppy drives with the [Versatile Commodore Emulator](http://vice-emu.sourceforge.net), VICE, you need to acquire an FD2000 ROM first.\
+In order to use the provided disk images for CMD FD2000 floppy drives with the [Versatile Commodore Emulator](http://vice-emu.sourceforge.net), VICE, you need to acquire an FD2000 ROM first.
 
 ### Using the native partition
 You can copy files from either a .d64 or .d81 image to a .d2m one that uses the native partition by using a file copier, e.g. IDE64's File Manager, which is part of [IDEDOS](http://idedos.ide64.org).\
