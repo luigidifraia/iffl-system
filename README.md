@@ -22,6 +22,7 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - Integrated Lasse's drive detection (Dreamload) and added support for Commodore 1581 and CMD FD2000 drives with Lasse's help and advice.
 
 ## Acknowledgments
+This work would not be possible without Lasse's initial publication of his IFFL system and without frequent emails with him and Flavio.
 
 ## To do
 - Mark sections of the code that are critical to keep in the same page in RAM.
