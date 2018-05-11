@@ -15,7 +15,7 @@ start:          jsr initloader
                 jsr loadfile            ;Load file $01 - music
                 bcs error
                 jsr setvideomode        ;Change video mode and bank so we can display
-                jsr vsetup              ;the sprite and appreciate data while it loads
+                jsr spritesetup         ;the sprite and appreciate data while it loads
                 jsr initirq             ;Attach tune playback and sprite animation
                 lda #$10                ;Try to load some nonexistent file -
                 jsr loadfile            ;should be harmless as long file number
