@@ -66,6 +66,9 @@ drvoffstbl      = $0780                 ;Start offset of files
 ; Remarks: If the IFFL loader requires relocation to page 2 and/or 3, then
 ;          call initloader1, relocate the loader, and then call initloader2.
 ;
+; Pre: Kernal disk routines expect RS-232 interrupts to be disabled ($02a1 
+;      = 0x00) and the STOP key flag to signal no key pressed ($91 = 0xff)
+;
 ; Parameters: -
 ; Returns: C=0 IFFL initialized OK
 ;          C=1 Error
