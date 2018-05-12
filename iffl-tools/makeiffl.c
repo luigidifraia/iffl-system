@@ -12,7 +12,7 @@ int main(int argc, char **argv)
         int c;
         FILE *out;
 
-        if (argc < 2)
+        if (argc != 2)
         {
                 printf("Usage: makeiffl <iffl_filename>\n"
                        "Creates new IFFL-file to which files can then be added.\n");
