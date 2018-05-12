@@ -6,6 +6,13 @@
 
                 include basic_boot.s
 
+prepare:        sei
+                cld
+                ldx #$ff
+                txs
+                stx $91                 ;Signal no key pressed
+                inx
+                stx $02a1               ;Signal RS-232 interrupts are disabled
 start:          jsr initloader
                 bcs error
                 lda #$00
