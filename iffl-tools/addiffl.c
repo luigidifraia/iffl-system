@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         FILE *in, *out;
 
 
-        if (argc < 2)
+        if (argc != 3)
         {
                 printf("Usage: addiffl <iffl_filename> <filename>\n"
                        "Adds file <filename> to the IFFL file. IFFL file can hold max. 127 files and\n"
