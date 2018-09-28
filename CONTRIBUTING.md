@@ -12,7 +12,7 @@ If you want to contribute to this project and make it better, your help is very 
 * If you created your fork a while ago be sure to pull `upstream` changes into your local repository.
   * To pull from `master`, run `git pull upstream master`.
 * Create a new topic branch to work on. Branch from `develop` if it exists, else from `master`.
-  * To create a topic branch `my-contribution master` based on `master`, run `git checkout -b my-contribution master`.
+  * To create a topic branch `my-contribution` based on `master`, run `git checkout -b my-contribution master`.
 * Implement/fix your feature(s); comment your code.
 * Follow the code style of the project, including indentation.
 * Add or change the documentation as needed.
