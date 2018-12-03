@@ -21,6 +21,22 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 - Added support for ByteBoozer 2.0 (which does **not** require a depack buffer on the C=64), Pucrunch and Exomizer files. Furthermore, linked packed files are all loaded with a single loader call.
 - Integrated Lasse's drive detection (Dreamload) and added support for Commodore 1581 and CMD FD2000 drives with Lasse's help and advice.
 
+## Warning
+If you need to change the VIC bank in between load requests, you might want to avoid setting $dd00 and set $dd02 instead.
+Example for setting $dd02, from the documentation of [DreamLoad](https://csdb.dk/release/?id=6093):
+```
+    lda #%......xy
+    sta $dd00
+```
+becomes:
+```
+    lda #0                  ;only once in your init routine
+    sta $dd00               ;don't do this while loading
+
+    lda #($3f EOR %xy)      ;substitute for setting the VIC
+    sta $dd02               ;bank to %xy
+```
+
 ## To do
 - Mark sections of the code that are critical to keep in the same page in RAM.
 - Add support for CMD FD4000, and SD2IEC.
