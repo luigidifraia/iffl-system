@@ -6,7 +6,7 @@
 all: iffl_bb2.d81 iffl_unp.d81
 
 clean:
-	rm -f *.d64 *.b2 iffl_*.prg iffldata_* picture_data_bb2_linked
+	rm -f *.d64 *.d81 *.b2 iffl_*.prg iffldata_* sprites_and_music_data_bb2_linked picture_data_bb2_linked
 
 iffl_bb2.d81: iffl_bb2.d64 iffl_bb2_1581.seq
 	c1541 < iffl_bb2_1581.seq
