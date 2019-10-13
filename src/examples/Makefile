@@ -6,7 +6,7 @@
 all: iffl_bb2.d81 iffl_bb2_linked.d81 iffl_exom.d81 iffl_exom_linked.d81 iffl_pucr.d81 iffl_pucr_linked.d81 iffl_unp.d81
 
 clean:
-	rm -f *.d64 *.b2 *.exo *.puc data_*_linked iffl_*.prg iffldata_*
+	rm -f *.d64 *.d81 *.b2 *.exo *.puc data_*_linked iffl_*.prg iffldata_*
 
 iffl_bb2.d81: iffl_bb2.d64 iffl_bb2_1581.seq
 	c1541 < iffl_bb2_1581.seq
