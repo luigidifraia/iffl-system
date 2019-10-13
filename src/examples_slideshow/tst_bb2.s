@@ -6,7 +6,7 @@ num_pics = 2
 
                 processor 6502
 
-                include basic_boot.s
+                include "basic_boot.s"
 
 prepare:        sei
                 cld
@@ -44,8 +44,8 @@ error:          sta $d020               ;If any error, store errorcode to border
 
 currentpic:	dc.b 0
 
-                include common.s
+                include "common.s"
 
-                include cfg_bb2.s
-                include ..\iffl_loader.s
-                include ..\iffl_init.s
+                include "cfg_bb2.s"
+                include "../iffl_loader.s"
+                include "../iffl_init.s"

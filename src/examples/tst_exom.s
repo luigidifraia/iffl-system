@@ -4,7 +4,7 @@
 
                 processor 6502
 
-                include basic_boot.s
+                include "basic_boot.s"
 
 prepare:        sei
                 cld
@@ -31,8 +31,8 @@ done:           jmp done                ;Loop endlessly, showing the pic and
 error:          sta $d020               ;If any error, store errorcode to border and
                 jmp done                ;loop endlessly
 
-                include common.s
+                include "common.s"
 
-                include cfg_exom.s
-                include ..\iffl_loader.s
-                include ..\iffl_init.s
+                include "cfg_exom.s"
+                include "../iffl_loader.s"
+                include "../iffl_init.s"
