@@ -41,5 +41,8 @@ becomes:
 - Mark sections of the code that are critical to keep in the same page in RAM.
 - Add support for CMD FD4000, and SD2IEC.
 
+## Productions that use this loader
+This loader was used to put together my [IFFL version of Barbarian 2](https://www.luigidifraia.com/retroware/#IFFL_version_of_Barbarian_II_for_the_1541_disk_drive).
+
 ## Acknowledgments
 It wouldn't be possible for me to contribute this project without Lasse's initial publication of his IFFL System and Loadersystem, and without a number of email exchanges I had with him and Flavio.
