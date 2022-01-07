@@ -10,7 +10,14 @@
 *.exo
 *.puc
 
+# iffl files
+*.iff
+*.iffl
+
 # Intermediate IFFL files
 data_*_linked
 iffl_*.prg
 iffldata_*
+
+# IDE files
+.vscode
