@@ -618,6 +618,9 @@ dr_init_1mhz:
 
 ;-------------------------------------------------------------------------------
 ; Subroutine: send byte in A to C64 (with 2-bit protocol no IRQs are allowed)
+;
+; Remarks: When TWOBIT_PROTOCOL=0, sendbyte does not wait for the C64 to finish
+;          receiving, so handshake is necessary before calling getbyte.
 ;-------------------------------------------------------------------------------
 
 .dr_sendbyte:
@@ -1042,7 +1045,10 @@ drv_dirsct:     ldx #3
                                         ;file number
 
 ;-------------------------------------------------------------------------------
-; Subroutine: send byte in A to C64; no IRQs are allowed.
+; Subroutine: send byte in A to C64 (with 2-bit protocol no IRQs are allowed)
+;
+; Remarks: When TWOBIT_PROTOCOL=0, sendbyte does not wait for the C64 to finish
+;          receiving, so handshake is necessary before calling getbyte.
 ;-------------------------------------------------------------------------------
 
 .dr_sendbyte:
