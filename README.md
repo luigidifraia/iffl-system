@@ -5,10 +5,10 @@ Originally published on Covert Bitops' [C64 page](https://cadaver.github.io/rant
 
 ## Notes
 - Assemble source files with `dasm`. Version 2.12.04 from Covert Bitops' [Tools page](https://cadaver.github.io/tools.html) has been successfully tested.
-- The `makedisk` tool is available from Covert Bitops' [Tools page](https://cadaver.github.io/tools.html).
-- The `c1541` tool is available from VICE's [Web page](http://vice-emu.sourceforge.net/index.html#download).
-- If you plan to use ByteBoozer2 crunching, get the extended version of the cruncher from [here](https://github.com/luigidifraia/ByteBoozer2).
-- To use the provided `Makefile` you need GNU `make`. If you don't know where to get it you're probably using Windows, so you might want to try [this one](http://gnuwin32.sourceforge.net/packages/make.htm).
+- The `makedisk` tool is available from Covert Bitops' [Tools page](https://cadaver.github.io/tools.html). A Windows executable is provided for user convenience.
+- The `c1541` tool is available from VICE's [Web page](http://vice-emu.sourceforge.net/index.html#download). A Windows executable is provided for user convenience.
+- If you plan to use ByteBoozer2 crunching, get the extended version of the cruncher from [here](https://github.com/luigidifraia/ByteBoozer2). A Windows executable is provided for user convenience.
+- To use the provided `Makefile` you need GNU `make`. A Windows executable is provided for user convenience.
 - Under Windows you might want to run `win32/ifflvar.bat` to setup your build environment, then either run `make` or any of the provided batch files.
 
 ## Fixes
@@ -45,4 +45,4 @@ becomes:
 This loader was used to put together my [IFFL version of Barbarian 2](https://www.luigidifraia.com/retroware/#IFFL_version_of_Barbarian_II_for_the_1541_disk_drive).
 
 ## Acknowledgments
-It wouldn't be possible for me to contribute this project without Lasse's initial publication of his IFFL System and Loadersystem, and without a number of email exchanges I had with him and Flavio.
+It wouldn't be possible for me to contribute this project without Lasse's initial publication of his IFFL System and Loadersystem, and without a number of email exchanges I had with him and [Flavioweb](https://csdb.dk/scener/?id=23136).
