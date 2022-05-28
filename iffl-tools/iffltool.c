@@ -214,30 +214,30 @@ int main(int argc, char **argv)
 {
 
     // check for correct number of arguments
-    if (argc > 1 && strncmp(argv[1], "-h", 2) == 0)
+    if (argc > 1 && strncmp(argv[1], "help", 4) == 0)
     {
         print_help();
         return 0;
-    }
+    } 
     else if (argc < 2)
     {
         printf("%s\n\n", "No arguments given");
         print_help();
         return 0;
     }
-    else if (argc > 2 && strncmp(argv[1], "create", 2) == 0)
+    else if (argc > 2 && strncmp(argv[1], "create", 6) == 0)
     {
         create_iffl_file(argv[2]);
     }
-    else if (argc > 3 && strncmp(argv[1], "add", 2) == 0)
+    else if (argc > 3 && strncmp(argv[1], "add", 3) == 0)
     {
         add_file_to_iffl(argv[3], argv[2]);
     }
-    else if (argc > 2 && strncmp(argv[1], "list", 2) == 0)
+    else if (argc > 2 && strncmp(argv[1], "list", 4) == 0)
     {
         list_files(argv[2]);
     }
-    else if (argc > 2 && strncmp(argv[1], "flush", 2) == 0)
+    else if (argc > 2 && strncmp(argv[1], "flush", 4) == 0)
     {
         flush_iffl_file(argv[2]);
     }
