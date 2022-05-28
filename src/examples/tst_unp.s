@@ -7,14 +7,17 @@
                 include "basic_boot.s"
 
 prepare:        sei
+
                 cld
                 ldx #$ff
                 txs
                 stx $91                 ;Signal no key pressed
                 inx
                 stx $02a1               ;Signal RS-232 interrupts are disabled
+
 start:          jsr initloader
                 bcs error
+
                 lda #$00
                 jsr loadfile            ;Load file $00 - music
                 bcs error
@@ -25,6 +28,7 @@ start:          jsr initloader
                 jsr loadfile            ;Load file $01 - picture
                 bcs error
                 jsr showpicture
+
 done:           jmp done                ;Loop endlessly, showing the pic and
                                         ;playing the tune
 
