@@ -199,7 +199,7 @@ int list_files(char *iffl_filename)
 
 void print_help()
 {
-    printf("Usage: iffltool [options]\n");
+    printf("Usage: iffltool <command> [filename(s)]\n");
     printf("Commands:\n");
     printf("  create <iffl-file>\t\tCreate a new IFFL file\n");
     printf("  add <file> <iffl-file>\tAdd a file to an IFFL file\n");
